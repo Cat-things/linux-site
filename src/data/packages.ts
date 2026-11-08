@@ -1,0 +1,197 @@
+// Every package in kat-linux/distro packages.x86_64 (143 entries), grouped by
+// what it does on the live ISO. Groupings are editorial; the package names are not.
+
+export interface PackageGroup {
+  id: string;
+  title: string;
+  blurb: string;
+  packages: string[];
+}
+
+export const packageGroups: PackageGroup[] = [
+  {
+    id: 'desktop',
+    title: 'Live desktop',
+    blurb: 'The graphical session the ISO boots into: Xfce on Xorg, started by LightDM.',
+    packages: [
+      'xfce4',
+      'xfce4-goodies',
+      'lightdm',
+      'lightdm-slick-greeter',
+      'xorg-server',
+      'xf86-video-fbdev',
+      'xf86-video-vesa',
+      'xdg-utils',
+    ],
+  },
+  {
+    id: 'apps',
+    title: 'Apps',
+    blurb: 'A browser and a GPU-accelerated terminal, ready on the live desktop.',
+    packages: ['firefox', 'kitty'],
+  },
+  {
+    id: 'audio',
+    title: 'Audio',
+    blurb: 'PipeWire with its PulseAudio bridge, WirePlumber and a mixer.',
+    packages: ['pipewire', 'pipewire-pulse', 'wireplumber', 'pavucontrol', 'alsa-utils', 'sof-firmware'],
+  },
+  {
+    id: 'base',
+    title: 'Base system',
+    blurb: 'Arch base, the stock kernel, firmware, microcode and the archiso initramfs.',
+    packages: [
+      'base',
+      'linux',
+      'linux-firmware',
+      'linux-firmware-marvell',
+      'amd-ucode',
+      'intel-ucode',
+      'mkinitcpio',
+      'mkinitcpio-archiso',
+      'mkinitcpio-nfs-utils',
+      'sudo',
+      'less',
+      'diffutils',
+      'man-db',
+      'man-pages',
+    ],
+  },
+  {
+    id: 'install',
+    title: 'Installing',
+    blurb: 'The guided installer, the scripts underneath it and a mirror ranker.',
+    packages: ['archinstall', 'arch-install-scripts', 'reflector'],
+  },
+  {
+    id: 'boot',
+    title: 'Boot & firmware',
+    blurb: 'Bootloaders, UEFI tools and a RAM tester for BIOS and UEFI.',
+    packages: ['syslinux', 'grub', 'refind', 'efibootmgr', 'edk2-shell', 'memtest86+', 'memtest86+-efi'],
+  },
+  {
+    id: 'storage',
+    title: 'Disks & filesystems',
+    blurb: 'Partitioning, encryption, RAID, LVM and tools for most Linux and non-Linux filesystems.',
+    packages: [
+      'parted',
+      'gptfdisk',
+      'gpart',
+      'fatresize',
+      'btrfs-progs',
+      'bcachefs-tools',
+      'e2fsprogs',
+      'xfsprogs',
+      'f2fs-tools',
+      'jfsutils',
+      'nilfs-utils',
+      'ntfs-3g',
+      'exfatprogs',
+      'dosfstools',
+      'udftools',
+      'squashfs-tools',
+      'mtools',
+      'cryptsetup',
+      'lvm2',
+      'mdadm',
+      'dmraid',
+      'nvme-cli',
+      'mmc-utils',
+      'hdparm',
+      'sdparm',
+      'sg3_utils',
+      'lsscsi',
+      'smartmontools',
+      'nbd',
+      'nfs-utils',
+      'open-iscsi',
+    ],
+  },
+  {
+    id: 'rescue',
+    title: 'Backup & rescue',
+    blurb: 'Disk imaging, cloning and data recovery for when something has gone wrong.',
+    packages: ['clonezilla', 'partclone', 'partimage', 'fsarchiver', 'ddrescue', 'testdisk', 'rsync', 'pv'],
+  },
+  {
+    id: 'network',
+    title: 'Networking',
+    blurb: 'Wired, Wi-Fi, mobile broadband, dial-up and VPN clients.',
+    packages: [
+      'networkmanager',
+      'network-manager-applet',
+      'iwd',
+      'wpa_supplicant',
+      'wireless_tools',
+      'iw',
+      'wireless-regdb',
+      'dhcpcd',
+      'systemd-resolvconf',
+      'modemmanager',
+      'usb_modeswitch',
+      'ppp',
+      'wvdial',
+      'linux-atm',
+      'openssh',
+      'openvpn',
+      'openconnect',
+      'vpnc',
+      'pptpclient',
+      'xl2tpd',
+    ],
+  },
+  {
+    id: 'nettools',
+    title: 'Network tools',
+    blurb: 'Diagnostics, DNS, transfers and a couple of text-mode clients.',
+    packages: ['nmap', 'tcpdump', 'ethtool', 'ndisc6', 'bind', 'ldns', 'dnsmasq', 'lftp', 'darkhttpd', 'lynx', 'irssi'],
+  },
+  {
+    id: 'hardware',
+    title: 'Hardware support',
+    blurb: 'Broadcom Wi-Fi, Thunderbolt, USB and hardware inventory tools.',
+    packages: ['broadcom-wl-dkms', 'b43-fwcutter', 'bolt', 'usbutils', 'usbmuxd', 'libusb-compat', 'dmidecode', 'gpm'],
+  },
+  {
+    id: 'security',
+    title: 'Keys & security',
+    blurb: 'TPM, FIDO2, smart cards and OpenPGP tooling.',
+    packages: ['tpm2-tools', 'tpm2-tss', 'libfido2', 'pcsclite', 'openpgp-card-tools', 'sequoia-sq'],
+  },
+  {
+    id: 'vm',
+    title: 'Virtual machines & cloud',
+    blurb: 'Guest agents for QEMU, VMware, VirtualBox and Hyper-V, plus cloud-init.',
+    packages: ['qemu-guest-agent', 'open-vm-tools', 'virtualbox-guest-utils-nox', 'hyperv', 'cloud-init'],
+  },
+  {
+    id: 'shell',
+    title: 'Shell & console',
+    blurb: 'Zsh with the grml config, multiplexers, editors and terminfo for popular terminals.',
+    packages: [
+      'zsh',
+      'grml-zsh-config',
+      'tmux',
+      'screen',
+      'vim',
+      'nano',
+      'mc',
+      'terminus-font',
+      'foot-terminfo',
+      'kitty-terminfo',
+      'rxvt-unicode-terminfo',
+    ],
+  },
+  {
+    id: 'a11y',
+    title: 'Accessibility',
+    blurb: 'Braille display support, the speakup screen reader and boot sounds for the speech boot entry.',
+    packages: ['brltty', 'espeakup', 'livecd-sounds'],
+  },
+];
+
+export const packageCount = packageGroups.reduce((n, g) => n + g.packages.length, 0);
+
+export function archPackageSearch(name: string): string {
+  return `https://archlinux.org/packages/?q=${encodeURIComponent(name)}`;
+}

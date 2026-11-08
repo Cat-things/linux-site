@@ -1,0 +1,305 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Source from '../components/Source.astro';
+import Icon from '../components/Icon.astro';
+import { href } from '../lib/url';
+import { links, repoFile, upstreamLeftovers } from '../data/site';
+
+const done = [
+  { text: 'ISO name, label and publisher changed to Kat Linux', slug: 'first-profile' },
+  { text: 'Xfce live desktop with LightDM logging in the archie user', slug: 'lightdm-fixed' },
+  { text: 'Automated ISO builds on GitHub Actions, published as the “latest” release', slug: 'automated-iso-builds' },
+  { text: 'Kat Linux titles in the GRUB and BIOS (syslinux) boot menus', slug: 'bios-menu-says-kat-linux' },
+  { text: 'Sound, networking tools and Firefox on the live desktop', slug: 'lightdm-fixed' },
+  { text: 'Two wallpapers and a new boot splash', slug: 'wallpapers-and-a-todo-list' },
+];
+---
+
+<Base
+  title="Roadmap"
+  description="What is done in Kat Linux, what comes next and what comes later, based on the to-do list in the project's README."
+>
+  <PageHead eyebrow="Roadmap" title="Where Kat Linux is headed">
+    The plan comes from the to-do list in the project's <a href={repoFile('README.md')}>README</a>, in the order it
+    lists things. Nothing here has a date attached.
+  </PageHead>
+
+  <div class="section">
+    <div class="wrap">
+      <ol class="track" aria-label="README to-do list">
+        <li class="stop stop--done">
+          <p class="stop__status"><span class="dot" aria-hidden="true"></span>Done</p>
+          <h2>Base ArchISO</h2>
+          <p class="stop__lede">A working, bootable Kat Linux ISO built from an archiso profile.</p>
+          <ul class="ticks">
+            {
+              done.map((d) => (
+                <li>
+                  <Icon name="check" size={18} />
+                  <a href={`${href('/devlog/')}#${d.slug}`}>{d.text}</a>
+                </li>
+              ))
+            }
+          </ul>
+        </li>
+
+        <li class="stop stop--next">
+          <p class="stop__status"><span class="dot" aria-hidden="true"></span>Next</p>
+          <h2>Full Appearance</h2>
+          <p class="stop__lede">
+            Making Kat Linux look like Kat Linux everywhere. The repository doesn't define the scope in detail yet;
+            this is where things stand.
+          </p>
+          <h3>Already in place</h3>
+          <ul class="plain">
+            <li>Wallpapers in <code>/usr/share/backgrounds/kat/</code>, set as the live desktop default</li>
+            <li>A Kat Linux boot splash behind the BIOS menu</li>
+          </ul>
+          <h3>Still showing upstream wording</h3>
+          <ul class="leftovers">
+            {
+              upstreamLeftovers.map((l) => (
+                <li>
+                  <span>{l.what}</span>
+                  <Source path={l.where} />
+                </li>
+              ))
+            }
+          </ul>
+          <p class="stop__note">
+            archinstall also installs a plain Arch system, so none of the Kat Linux look reaches an installed machine
+            today.
+          </p>
+        </li>
+
+        <li class="stop stop--later">
+          <p class="stop__status"><span class="dot" aria-hidden="true"></span>Later</p>
+          <h2>Custom Package Manager</h2>
+          <p class="stop__lede">
+            Listed in the README, with no design or code in the repository yet. Until then, Kat Linux uses pacman, the
+            Arch package manager, and everything you know about it applies.
+          </p>
+          <p class="stop__note">Ideas and discussion happen on the <a href={links.discord}>Discord</a>.</p>
+        </li>
+      </ol>
+
+      <div class="help">
+        <div>
+          <h2>Want to move something along?</h2>
+          <p class="muted">
+            Most of the “still showing upstream wording” list is a few lines of config each. They make good first pull
+            requests.
+          </p>
+        </div>
+        <div class="help__actions">
+          <a class="btn btn-primary" href={href('/contribute/')}>How to contribute <Icon name="arrow" /></a>
+          <a class="btn" href={links.discord}>Talk to the team</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .track {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0;
+    position: relative;
+  }
+
+  @media (min-width: 64rem) {
+    .track {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 2.5rem;
+    }
+  }
+
+  .stop {
+    --stop: var(--line-strong);
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+    position: relative;
+    padding: 0 0 2.75rem 2.25rem;
+    border-left: 3px solid var(--stop);
+    margin-left: 0.6rem;
+    min-width: 0;
+  }
+
+  .stop:last-child {
+    padding-bottom: 0.5rem;
+  }
+
+  @media (min-width: 64rem) {
+    .stop {
+      padding: 2rem 0 0;
+      margin-left: 0;
+      border-left: 0;
+      border-top: 4px solid var(--stop);
+    }
+  }
+
+  .stop--done {
+    --stop: var(--nose);
+  }
+
+  .stop--next {
+    --stop: var(--iris-fill);
+  }
+
+  .stop--later {
+    border-left-style: dashed;
+  }
+
+  @media (min-width: 64rem) {
+    .stop--later {
+      border-top-style: dashed;
+    }
+  }
+
+  .stop__status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .dot {
+    position: absolute;
+    left: calc(-0.6rem - 1.5px);
+    top: 0.2rem;
+    width: 1.2rem;
+    height: 1.2rem;
+    border-radius: 50%;
+    border: 3px solid var(--stop);
+    background: var(--paper);
+  }
+
+  @media (min-width: 64rem) {
+    .dot {
+      left: 0;
+      top: calc(-0.6rem - 2px);
+    }
+  }
+
+  .stop--done .dot {
+    background: var(--nose);
+  }
+
+  .stop--next .dot {
+    background: linear-gradient(90deg, var(--iris-fill) 50%, var(--paper) 50%);
+  }
+
+  .stop--done .stop__status {
+    color: var(--nose);
+  }
+
+  .stop--next .stop__status {
+    color: var(--iris);
+  }
+
+  .stop--later .stop__status {
+    color: var(--ink-2);
+  }
+
+  .stop h2 {
+    font-size: var(--step-3);
+  }
+
+  .stop h3 {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-top: 0.5rem;
+  }
+
+  .stop__lede {
+    color: var(--ink-2);
+  }
+
+  .stop__note {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .ticks,
+  .plain,
+  .leftovers {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .ticks li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.6rem;
+    align-items: start;
+  }
+
+  .ticks :global(svg) {
+    color: var(--nose);
+    margin-top: 0.2rem;
+  }
+
+  .ticks a {
+    color: var(--ink);
+    text-decoration-color: var(--line-strong);
+  }
+
+  .ticks a:hover {
+    color: var(--nose);
+  }
+
+  .plain li,
+  .leftovers li {
+    padding-left: 1rem;
+    border-left: 2px solid var(--line);
+  }
+
+  .leftovers li {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .help {
+    display: grid;
+    gap: 1.5rem 3rem;
+    align-items: center;
+    margin-top: clamp(3rem, 2rem + 3vw, 5rem);
+    padding: clamp(1.5rem, 1rem + 2vw, 2.5rem);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-l);
+    background: var(--card);
+  }
+
+  @media (min-width: 56rem) {
+    .help {
+      grid-template-columns: minmax(0, 1fr) auto;
+    }
+  }
+
+  .help h2 {
+    font-size: var(--step-2);
+    margin-bottom: 0.4rem;
+  }
+
+  .help__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+</style>

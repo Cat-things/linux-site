@@ -1,0 +1,74 @@
+---
+import Icon from './Icon.astro';
+
+interface Props {
+  tone?: 'note' | 'warning' | 'danger';
+  title: string;
+  class?: string;
+}
+const { tone = 'note', title, class: className } = Astro.props;
+const icon = tone === 'note' ? 'info' : 'warning';
+---
+
+<aside class:list={['callout', `callout--${tone}`, className]}>
+  <Icon name={icon} size={22} class="callout__icon" />
+  <div class="callout__body">
+    <p class="callout__title">{title}</p>
+    <div class="callout__text"><slot /></div>
+  </div>
+</aside>
+
+<style>
+  .callout {
+    --c-ink: var(--ink-2);
+    --c-accent: var(--ink-2);
+    --c-bg: var(--well);
+    --c-line: var(--line);
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.85rem;
+    padding: 1rem 1.15rem;
+    border: 1px solid var(--c-line);
+    border-radius: var(--radius-m);
+    background: var(--c-bg);
+    color: var(--ink);
+  }
+
+  .callout--warning {
+    --c-accent: var(--iris);
+    --c-bg: var(--iris-tint);
+    --c-line: color-mix(in oklab, var(--iris) 45%, transparent);
+  }
+
+  .callout--danger {
+    --c-accent: var(--danger);
+    --c-bg: var(--danger-tint);
+    --c-line: var(--danger-line);
+    border-width: 1.5px;
+  }
+
+  .callout :global(.callout__icon) {
+    color: var(--c-accent);
+    margin-top: 0.15rem;
+  }
+
+  .callout__body {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .callout__title {
+    font-weight: 800;
+    color: var(--c-accent);
+  }
+
+  .callout--note .callout__title {
+    color: var(--ink);
+  }
+
+  .callout__text {
+    display: grid;
+    gap: 0.5rem;
+    color: var(--ink);
+  }
+</style>

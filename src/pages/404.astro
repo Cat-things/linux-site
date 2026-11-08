@@ -1,0 +1,132 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import Icon from '../components/Icon.astro';
+import wires from '../assets/wallpaper-wires.png';
+import { href } from '../lib/url';
+---
+
+<Base title="Page not found" description="This page doesn't exist. The cat has been notified.">
+  <section class="lost">
+    <div class="wrap lost__grid">
+      <div class="lost__copy">
+        <p class="eyebrow">Error 404</p>
+        <h1>This page ran off.</h1>
+        <p class="lost__term mono" aria-label="Terminal output">
+          <span class="prompt" aria-hidden="true">$</span> cat <span data-path>this-page</span><br />
+          <span class="err">cat: <span data-path>this-page</span>: No such file or directory</span>
+        </p>
+        <p class="lede">
+          The live user has a file at <code>~/cool/cool/cool/cool/cool/cool/cool/cool/cool/cool/hi</code>, so
+          we do hide things in deep places. This page isn't one of them.
+        </p>
+        <div class="lost__actions">
+          <a class="btn btn-primary" href={href('/')}>Back home</a>
+          <a class="btn" href={href('/download/')}><Icon name="download" /> Download</a>
+          <a class="btn" href={href('/faq/')}>FAQ</a>
+        </div>
+      </div>
+      <figure class="lost__cat eared">
+        <Picture
+          src={wires}
+          formats={['avif', 'webp']}
+          widths={[400, 800]}
+          sizes="(min-width: 56rem) 28rem, 90vw"
+          fallbackFormat="jpg"
+          alt="A grey and white cat pressing its face right up to the camera, staring at you with wide eyes."
+        />
+        <figcaption>wires.png, from the Kat Linux wallpapers. The cat doesn't know where the page went either.</figcaption>
+      </figure>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const path = decodeURIComponent(location.pathname).replace(/\/+$/, '') || '/';
+  document.querySelectorAll('[data-path]').forEach((el) => (el.textContent = path));
+</script>
+
+<style>
+  .lost {
+    padding-block: clamp(3rem, 2rem + 5vw, 7rem);
+  }
+
+  .lost__grid {
+    display: grid;
+    gap: 3rem;
+    align-items: center;
+  }
+
+  @media (min-width: 56rem) {
+    .lost__grid {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      gap: 4rem;
+    }
+  }
+
+  .lost__copy {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .lost h1 {
+    font-size: clamp(2.75rem, 1.4rem + 5.5vw, 5.75rem);
+    font-stretch: 120%;
+    line-height: 0.95;
+  }
+
+  .lost__term {
+    width: 100%;
+    padding: 1rem 1.15rem;
+    border-radius: var(--radius-m);
+    background: var(--code-bg);
+    color: var(--code-ink);
+    font-size: var(--step--1);
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+  }
+
+  .prompt {
+    color: var(--code-accent);
+  }
+
+  .err {
+    color: var(--code-dim);
+  }
+
+  .lost .lede code {
+    overflow-wrap: anywhere;
+  }
+
+  .lost__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .lost__cat {
+    --ear-color: var(--ink);
+    --ear-inset: 16%;
+    margin-inline: 0;
+    margin-bottom: 0;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lost__cat :global(img) {
+    width: 100%;
+    aspect-ratio: 1;
+    object-fit: cover;
+    object-position: 60% 50%;
+    border: 6px solid var(--ink);
+    border-radius: var(--radius-l);
+    background: var(--well);
+  }
+
+  .lost__cat figcaption {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+</style>

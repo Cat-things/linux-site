@@ -1,0 +1,349 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { href } from '../lib/url';
+import { links, repoFile } from '../data/site';
+
+const places = [
+  {
+    icon: 'chat' as const,
+    name: 'Discord',
+    url: links.discord,
+    host: 'discord.gg/DCvRzJsYTD',
+    text: 'Where the team talks. Ask questions, share screenshots of your install and follow what is being worked on.',
+  },
+  {
+    icon: 'git' as const,
+    name: 'GitHub',
+    url: links.org,
+    host: 'github.com/kat-linux',
+    text: 'The kat-linux organisation. The distro repository holds the whole archiso profile and the build workflow.',
+  },
+  {
+    icon: 'bug' as const,
+    name: 'Issues',
+    url: links.issues,
+    host: 'github.com/kat-linux/distro/issues',
+    text: 'Found something broken? Report it here so it doesn’t get lost in chat.',
+  },
+];
+---
+
+<Base
+  title="Community"
+  description="Find the Kat Linux community on Discord and GitHub, report bugs, and join as a developer with the Looking to Dev role."
+>
+  <PageHead eyebrow="Community" title="Come hang out">
+    Kat Linux is made in the open on Discord and GitHub. Here's where to find everyone, and how to lend a paw.
+  </PageHead>
+
+  <section class="section" aria-labelledby="places-title">
+    <div class="wrap">
+      <h2 id="places-title" class="visually-hidden">Where to find us</h2>
+      <ul class="places">
+        {
+          places.map((p) => (
+            <li>
+              <a class="place" href={p.url}>
+                <span class="place__icon">
+                  <Icon name={p.icon} size={26} />
+                </span>
+                <span class="place__name">{p.name}</span>
+                <span class="place__host mono">{p.host}</span>
+                <span class="place__text">{p.text}</span>
+                <span class="place__go" aria-hidden="true">
+                  <Icon name="arrow" size={22} />
+                </span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section devs" aria-labelledby="devs-title">
+    <div class="wrap devs__grid">
+      <div class="devs__copy">
+        <p class="eyebrow">Help wanted</p>
+        <h2 id="devs-title">We're looking for devs</h2>
+        <blockquote cite={repoFile('README.md')}>
+          <p>
+            “We are looking for devs, if you want to help us, please join <a href={links.discord}
+              >https://discord.gg/DCvRzJsYTD</a
+            >, and add the "Looking to Dev" role in onboarding.”
+          </p>
+          <footer>From the project <a href={repoFile('README.md')}>README</a></footer>
+        </blockquote>
+      </div>
+      <ol class="steps devs__steps">
+        <li>
+          <h3>Join the Discord</h3>
+          <p>Use the invite link: <a href={links.discord}>discord.gg/DCvRzJsYTD</a>.</p>
+        </li>
+        <li>
+          <h3>Pick “Looking to Dev” in onboarding</h3>
+          <p>Discord asks you to choose roles when you join. Add this one so the team knows you want to build.</p>
+        </li>
+        <li>
+          <h3>Find something to work on</h3>
+          <p>
+            The <a href={href('/roadmap/')}>roadmap</a> lists what's open, and the
+            <a href={href('/contribute/')}>contributing guide</a> shows how to build and test the ISO.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="bugs-title">
+    <div class="wrap bugs">
+      <div class="section-head">
+        <p class="eyebrow">Bug reports</p>
+        <h2 id="bugs-title">Report a bug that gets fixed</h2>
+        <p class="muted">A good report saves a round of questions. Include these in your issue:</p>
+      </div>
+      <ul class="report">
+        <li>
+          <strong>Which build</strong>
+          <span>The ISO file name, like <code>katlinux-2026.11.07-x86_64.iso</code>. The date tells us the build.</span>
+        </li>
+        <li>
+          <strong>How you booted</strong>
+          <span>BIOS or UEFI, and real hardware or which virtual machine.</span>
+        </li>
+        <li>
+          <strong>What happened</strong>
+          <span>What you did, what you expected and what you got instead.</span>
+        </li>
+        <li>
+          <strong>Evidence</strong>
+          <span>Error text, or a photo of the screen if it fails before the desktop appears.</span>
+        </li>
+      </ul>
+      <a class="btn btn-primary" href={links.newIssue}><Icon name="bug" /> Open an issue on GitHub</a>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="more-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Other ways to help</p>
+        <h2 id="more-title">You don't have to write code</h2>
+      </div>
+      <ul class="ways">
+        <li>
+          <h3>Test builds</h3>
+          <p>Boot a fresh ISO on your hardware or in a VM, run through the install guide and report what breaks.</p>
+        </li>
+        <li>
+          <h3>Fix the leftovers</h3>
+          <p>
+            Several menus and messages still say “Arch Linux”. The <a href={href('/roadmap/')}>roadmap</a> lists each one
+            and the file it lives in.
+          </p>
+        </li>
+        <li>
+          <h3>Help the next person</h3>
+          <p>Answer questions on Discord, and point people to the install guide and FAQ.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .places {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 18rem), 1fr));
+  }
+
+  .place {
+    position: relative;
+    display: grid;
+    gap: 0.4rem;
+    height: 100%;
+    padding: 1.5rem 1.5rem 1.75rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    background: var(--card);
+    color: var(--ink);
+    text-decoration: none;
+    box-shadow: 0 3px 0 var(--line-strong);
+    transition:
+      translate 120ms ease,
+      box-shadow 120ms ease,
+      border-color 120ms ease;
+  }
+
+  .place:hover {
+    color: var(--ink);
+    border-color: var(--nose);
+    box-shadow: 0 5px 0 var(--nose);
+    translate: 0 -2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .place,
+    .place:hover {
+      transition: none;
+      translate: none;
+    }
+  }
+
+  .place__icon {
+    display: grid;
+    place-items: center;
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 0.5rem;
+    border-radius: var(--radius-m);
+    background: var(--nose-tint);
+    color: var(--nose);
+  }
+
+  .place__name {
+    font-family: var(--type-display);
+    font-size: var(--step-2);
+    font-weight: 800;
+    font-stretch: 115%;
+    line-height: 1.1;
+  }
+
+  .place__host {
+    font-size: var(--step--2);
+    color: var(--nose);
+    overflow-wrap: anywhere;
+  }
+
+  .place__text {
+    color: var(--ink-2);
+    margin-top: 0.35rem;
+  }
+
+  .place__go {
+    position: absolute;
+    top: 1.5rem;
+    right: 1.5rem;
+    color: var(--ink-3);
+  }
+
+  .place:hover .place__go {
+    color: var(--nose);
+  }
+
+  /* ---- devs ---- */
+  .devs {
+    background: var(--nose-tint);
+  }
+
+  .devs__grid {
+    display: grid;
+    gap: 2.5rem 4rem;
+  }
+
+  @media (min-width: 60rem) {
+    .devs__grid {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .devs__copy {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .devs h2 {
+    font-size: var(--step-4);
+  }
+
+  blockquote {
+    margin: 0.5rem 0 0;
+    padding-left: 1.25rem;
+    border-left: 4px solid var(--nose);
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  blockquote p {
+    font-size: var(--step-1);
+    line-height: 1.5;
+  }
+
+  blockquote footer {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .devs__steps {
+    gap: 1.75rem;
+  }
+
+  .devs__steps p {
+    color: var(--ink-2);
+  }
+
+  /* ---- bug reports ---- */
+  .bugs {
+    display: grid;
+    justify-items: start;
+  }
+
+  .report {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    width: 100%;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    border-top: 2px solid var(--ink);
+  }
+
+  .report li {
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+    padding: 1.1rem 1.25rem 1.25rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .report strong {
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nose);
+  }
+
+  .report span {
+    color: var(--ink-2);
+  }
+
+  /* ---- other ways ---- */
+  .ways {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.5rem 2.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  }
+
+  .ways li {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .ways p {
+    color: var(--ink-2);
+  }
+</style>

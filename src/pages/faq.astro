@@ -1,0 +1,316 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import { href } from '../lib/url';
+import { links, repoFile, disclaimer } from '../data/site';
+---
+
+<Base
+  title="FAQ"
+  description="Answers about Kat Linux: is it Arch, can you use the AUR, is it stable, how to install it, and how to report bugs."
+>
+  <PageHead eyebrow="FAQ" title="Questions people ask">
+    Short answers, with links to the longer ones. Can't find yours? Ask on <a href={links.discord}>Discord</a>.
+  </PageHead>
+
+  <div class="section">
+    <div class="wrap split">
+      <nav class="rail" aria-label="FAQ topics">
+        <p class="eyebrow">Topics</p>
+        <ol class="toc">
+          <li><a href="#about">About Kat Linux</a></li>
+          <li><a href="#installing">Installing</a></li>
+          <li><a href="#using">Using it</a></li>
+          <li><a href="#project">The project</a></li>
+        </ol>
+      </nav>
+
+      <div class="faq">
+        <section id="about" aria-labelledby="about-title">
+          <h2 id="about-title">About Kat Linux</h2>
+
+          <details id="is-it-arch">
+            <summary>Is Kat Linux just Arch Linux?</summary>
+            <div class="answer">
+              <p>
+                Underneath, yes. The ISO is built with archiso from Arch's official repositories, it uses pacman, and
+                installing it runs archinstall, which sets up an Arch Linux system. What Kat Linux adds today is the
+                live ISO itself: its branding, a ready-made Xfce desktop with LightDM, and a selection of apps and
+                tools.
+              </p>
+              <p>A custom package manager and a full look of its own are on the <a href={href('/roadmap/')}>roadmap</a>.</p>
+            </div>
+          </details>
+
+          <details id="affiliated">
+            <summary>Is it affiliated with Arch Linux?</summary>
+            <div class="answer">
+              <p>No. {disclaimer}</p>
+            </div>
+          </details>
+
+          <details id="stable">
+            <summary>Is it stable enough to use?</summary>
+            <div class="answer">
+              <p>
+                Not yet. Only the base ISO is ticked off in the project's to-do list, and every push to the repository
+                produces a new build. The packages themselves are Arch's, but the Kat Linux parts are changing quickly.
+                Try it in a virtual machine or on a spare computer first.
+              </p>
+            </div>
+          </details>
+
+          <details id="desktop">
+            <summary>Which desktop does it use?</summary>
+            <div class="answer">
+              <p>
+                The live ISO runs Xfce, started by LightDM with Slick Greeter. When you install, archinstall lets you
+                pick any desktop profile it offers; choose Xfce4 to match the live session.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <section id="installing" aria-labelledby="installing-title">
+          <h2 id="installing-title">Installing</h2>
+
+          <details id="installer">
+            <summary>Is there a graphical installer?</summary>
+            <div class="answer">
+              <p>
+                No. The ISO ships archinstall, which runs in a terminal and walks you through a menu. Calamares was
+                added to the package list once, in September 2026, and removed again the same day. The <a
+                  href={href('/install/')}>install guide</a
+                > covers archinstall step by step.
+              </p>
+            </div>
+          </details>
+
+          <details id="firmware">
+            <summary>Does it boot on UEFI, BIOS and Secure Boot?</summary>
+            <div class="answer">
+              <p>
+                UEFI and BIOS both work: syslinux handles BIOS and systemd-boot handles UEFI. Secure Boot isn't set up,
+                so turn it off in your firmware settings if the stick won't start. Only 64-bit x86 (x86_64) PCs are
+                supported.
+              </p>
+            </div>
+          </details>
+
+          <details id="password">
+            <summary>What's the password on the live ISO?</summary>
+            <div class="answer">
+              <p>
+                There isn't one. LightDM logs the live user <code>archie</code> in automatically, and neither archie
+                nor root has a password set on the ISO. You'll choose real passwords in archinstall.
+              </p>
+            </div>
+          </details>
+
+          <details id="root">
+            <summary>How do I get root on the live ISO?</summary>
+            <div class="answer">
+              <p>
+                Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F1</kbd>. The first console is logged in as root
+                automatically. <code>sudo</code> from the desktop won't work, because the profile doesn't give archie
+                sudo rights yet.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <section id="using" aria-labelledby="using-title">
+          <h2 id="using-title">Using it</h2>
+
+          <details id="aur">
+            <summary>Can I use the AUR?</summary>
+            <div class="answer">
+              <p>
+                Yes. An installed Kat Linux system is Arch underneath, so the <a href={links.aur}>Arch User Repository</a
+                > works exactly as the Arch wiki describes. No AUR helper is installed for you. You can build packages
+                by hand with makepkg:
+              </p>
+              <CodeBlock
+                label="Build an AUR package by hand"
+                code={`sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/<package>.git
+cd <package>
+makepkg -si`}
+              />
+              <p class="muted">
+                AUR packages are written by users, not checked by Arch or by us. Read the PKGBUILD before you build
+                anything.
+              </p>
+            </div>
+          </details>
+
+          <details id="updates">
+            <summary>How do I update my system?</summary>
+            <div class="answer">
+              <p>The same way as on Arch. Kat Linux is rolling, so there are no version upgrades to wait for:</p>
+              <CodeBlock label="Update" code="sudo pacman -Syu" />
+            </div>
+          </details>
+
+          <details id="package-manager">
+            <summary>Does Kat Linux have its own package manager?</summary>
+            <div class="answer">
+              <p>
+                Not yet. A custom package manager is on the README's to-do list, but nothing has been built. For now
+                it's pacman, like on Arch.
+              </p>
+            </div>
+          </details>
+
+          <details id="multilib">
+            <summary>Can I run 32-bit software?</summary>
+            <div class="answer">
+              <p>
+                Yes, once you enable Arch's multilib repository. Pick it under optional repositories in archinstall,
+                or uncomment the <code>[multilib]</code> section in <code>/etc/pacman.conf</code> afterwards.
+              </p>
+            </div>
+          </details>
+        </section>
+
+        <section id="project" aria-labelledby="project-title">
+          <h2 id="project-title">The project</h2>
+
+          <details id="bugs">
+            <summary>How do I report a bug?</summary>
+            <div class="answer">
+              <p>
+                Open an issue at <a href={links.issues}>github.com/kat-linux/distro/issues</a>. Include the ISO file
+                name (the date tells us which build), whether you booted with BIOS or UEFI, your hardware or VM, and
+                what happened. The <a href={`${href('/community/')}#bugs-title`}>community page</a> has a checklist.
+              </p>
+            </div>
+          </details>
+
+          <details id="updates-iso">
+            <summary>How often is a new ISO built?</summary>
+            <div class="answer">
+              <p>
+                On every push to the main branch. GitHub Actions builds it and attaches it to the release tagged
+                <code>latest</code>, with the build date in the file name.
+              </p>
+            </div>
+          </details>
+
+          <details id="help">
+            <summary>Can I help?</summary>
+            <div class="answer">
+              <p>
+                Please do. Join the <a href={links.discord}>Discord</a> and add the “Looking to Dev” role in
+                onboarding. The <a href={href('/contribute/')}>contributing guide</a> explains how to build and test
+                the ISO.
+              </p>
+            </div>
+          </details>
+
+          <details id="license">
+            <summary>What license is Kat Linux under?</summary>
+            <div class="answer">
+              <p>
+                The distro repository is licensed under the <a href={repoFile('LICENSE')}>GNU General Public License
+                v3</a>. The packages on the ISO keep their own licenses.
+              </p>
+            </div>
+          </details>
+        </section>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<script>
+  // Open a question when the URL points at it, e.g. /faq/#aur
+  const openFromHash = () => {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (el instanceof HTMLDetailsElement) el.open = true;
+  };
+  openFromHash();
+  window.addEventListener('hashchange', openFromHash);
+</script>
+
+<style>
+  .faq {
+    display: grid;
+    gap: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    min-width: 0;
+    max-width: 50rem;
+  }
+
+  .faq section {
+    display: grid;
+  }
+
+  .faq h2 {
+    font-size: var(--step-2);
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  details {
+    border-bottom: 1px solid var(--line);
+  }
+
+  summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+    padding: 1.05rem 0;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: var(--step-1);
+    line-height: 1.35;
+    list-style: none;
+  }
+
+  summary::-webkit-details-marker {
+    display: none;
+  }
+
+  summary::after {
+    content: '';
+    flex: none;
+    width: 0.7rem;
+    height: 0.7rem;
+    border-right: 2.5px solid var(--nose);
+    border-bottom: 2.5px solid var(--nose);
+    rotate: 45deg;
+    translate: 0 -0.2rem;
+    transition: rotate 160ms ease;
+  }
+
+  details[open] > summary::after {
+    rotate: -135deg;
+    translate: 0 0.15rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    summary::after {
+      transition: none;
+    }
+  }
+
+  summary:hover {
+    color: var(--nose);
+  }
+
+  .answer {
+    display: grid;
+    gap: 0.85rem;
+    padding-bottom: 1.5rem;
+    max-width: var(--measure);
+    min-width: 0;
+  }
+
+  .answer .muted {
+    font-size: var(--step--1);
+  }
+</style>

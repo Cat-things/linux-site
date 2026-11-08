@@ -1,0 +1,41 @@
+---
+// Small stroke icons drawn on a 24px grid. Decorative unless `label` is set.
+interface Props {
+  name: keyof typeof paths;
+  size?: number;
+  label?: string;
+  class?: string;
+}
+
+const paths = {
+  download: 'M12 3v12m0 0-5-5m5 5 5-5M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2',
+  arrow: 'M5 12h14m-6-6 6 6-6 6',
+  external: 'M14 4h6v6m0-6-9 9M18 14v4a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4',
+  copy: 'M9 9h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H9a1 1 0 0 1-1-1V10a1 1 0 0 1 1-1Zm-4 6H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v1',
+  check: 'm5 12.5 4.5 4.5L19 7.5',
+  warning: 'M12 4 2.5 20h19L12 4Zm0 6v4.5m0 2.5v.5',
+  info: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Zm0-11v6m0-9v.5',
+  chat: 'M4 5h16v11H9l-5 4V5Zm4 5h8m-8 3h5',
+  bug: 'M9 8V6a3 3 0 0 1 6 0v2m-9 3H3m18 0h-3M6 17H3m18 0h-3M5 7l2 2m12-2-2 2M7 8h10v6a5 5 0 0 1-10 0V8Zm5 3v8',
+  terminal: 'M3 5h18v14H3V5Zm4 4 3 3-3 3m5 0h5',
+  git: 'M6 3v12m0 0a3 3 0 1 0 0 6 3 3 0 0 0 0-6Zm12-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm0 0c0 5-6 4-12 9',
+} as const;
+
+const { name, size = 20, label, class: className } = Astro.props;
+---
+
+<svg
+  class:list={['icon', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  role={label ? 'img' : undefined}
+  aria-label={label}
+  aria-hidden={label ? undefined : 'true'}
+  focusable="false"><path d={paths[name]}></path></svg
+>

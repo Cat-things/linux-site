@@ -1,0 +1,42 @@
+---
+// The Kat Linux mark: a terminal window with cat ears and a prompt.
+interface Props {
+  size?: number;
+  title?: string;
+  class?: string;
+}
+const { size = 32, title, class: className } = Astro.props;
+---
+
+<svg
+  class:list={['kat-mark', className]}
+  width={size}
+  height={size}
+  viewBox="0 0 64 64"
+  role={title ? 'img' : undefined}
+  aria-hidden={title ? undefined : 'true'}
+  aria-label={title}
+  focusable="false"
+>
+  <path
+    class="kat-mark__head"
+    d="M15 59h34a9 9 0 0 0 9-9V25L52.5 5.5 39.5 17h-15L11.5 5.5 6 25v25a9 9 0 0 0 9 9Z"
+  ></path>
+  <path class="kat-mark__prompt" d="M17 31.5l7.5 6-7.5 6" fill="none" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"></path>
+  <rect class="kat-mark__cursor" x="29" y="41" width="15" height="4.5" rx="1.5"></rect>
+</svg>
+
+<style>
+  .kat-mark {
+    flex: none;
+  }
+  .kat-mark__head {
+    fill: currentColor;
+  }
+  .kat-mark__prompt {
+    stroke: var(--paper);
+  }
+  .kat-mark__cursor {
+    fill: var(--nose);
+  }
+</style>

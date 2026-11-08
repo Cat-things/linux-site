@@ -1,0 +1,158 @@
+---
+import Logo from './Logo.astro';
+import { href } from '../lib/url';
+import { links, disclaimer } from '../data/site';
+
+const columns = [
+  {
+    title: 'Get it',
+    items: [
+      { label: 'Download', url: href('/download/') },
+      { label: 'Install guide', url: href('/install/') },
+      { label: "What's inside", url: href('/features/') },
+      { label: 'FAQ', url: href('/faq/') },
+    ],
+  },
+  {
+    title: 'Project',
+    items: [
+      { label: 'Devlog', url: href('/devlog/') },
+      { label: 'Roadmap', url: href('/roadmap/') },
+      { label: 'Contribute', url: href('/contribute/') },
+      { label: 'Community', url: href('/community/') },
+    ],
+  },
+  {
+    title: 'Elsewhere',
+    items: [
+      { label: 'Discord', url: links.discord },
+      { label: 'GitHub', url: links.org },
+      { label: 'Report a bug', url: links.issues },
+      { label: 'Latest release', url: links.release },
+    ],
+  },
+];
+---
+
+<footer class="site-footer">
+  <div class="wrap site-footer__grid">
+    <div class="site-footer__brand">
+      <a class="foot-brand" href={href('/')}>
+        <Logo size={44} />
+        <span class="visually-hidden">Kat Linux home</span>
+      </a>
+      <p>A cat-themed Linux distro built on Arch Linux, made in the open on GitHub.</p>
+    </div>
+    {
+      columns.map((col) => (
+        <nav class="site-footer__col" aria-label={col.title}>
+          <h2>{col.title}</h2>
+          <ul>
+            {col.items.map((item) => (
+              <li>
+                <a href={item.url}>{item.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+  <div class="wrap site-footer__legal">
+    <p>{disclaimer}</p>
+    <p class="whiskers" aria-hidden="true">=^..^=</p>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    margin-top: auto;
+    background: var(--band);
+    color: var(--band-ink-2);
+    padding-block: clamp(3rem, 2rem + 3vw, 4.5rem) 1.5rem;
+    font-size: var(--step--1);
+  }
+
+  .site-footer__grid {
+    display: grid;
+    gap: 2.5rem 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 10rem), 1fr));
+  }
+
+  .site-footer__brand {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    max-width: 22rem;
+  }
+
+  @media (min-width: 52rem) {
+    .site-footer__grid {
+      grid-template-columns: minmax(0, 1.6fr) repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  .foot-brand {
+    color: var(--band-ink);
+    width: fit-content;
+  }
+
+  .foot-brand :global(.kat-mark__prompt) {
+    stroke: var(--band);
+  }
+
+  .site-footer h2 {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--band-accent);
+    margin-bottom: 0.75rem;
+  }
+
+  .site-footer ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .site-footer a {
+    color: var(--band-ink);
+    text-decoration: none;
+    display: inline-block;
+    padding-block: 0.25rem;
+  }
+
+  .site-footer a:hover {
+    color: var(--band-accent);
+    text-decoration: underline;
+  }
+
+  .site-footer :focus-visible {
+    outline-color: var(--band-accent);
+  }
+
+  .site-footer__legal {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-top: clamp(2.5rem, 2rem + 2vw, 3.5rem);
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--band-line);
+  }
+
+  .site-footer__legal p:first-child {
+    max-width: 60ch;
+  }
+
+  .whiskers {
+    font-family: var(--type-mono);
+    color: var(--band-ink-2);
+    letter-spacing: 0.05em;
+  }
+</style>

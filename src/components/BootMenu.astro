@@ -1,0 +1,257 @@
+---
+// A faithful, interactive copy of the Kat Linux BIOS boot menu (syslinux
+// vesamenu) drawn over the real splash.png from the distro repo.
+import { Picture } from 'astro:assets';
+import splash from '../assets/boot-splash.png';
+import { biosMenu } from '../data/site';
+import Source from './Source.astro';
+
+const entries = biosMenu.entries;
+---
+
+<figure class="boot eared" aria-labelledby="boot-caption">
+  <div class="boot__bezel">
+    <div class="boot__screen">
+      <Picture
+        src={splash}
+        formats={['avif', 'webp']}
+        widths={[400, 640]}
+        sizes="(min-width: 66rem) 36rem, (min-width: 48rem) 80vw, 100vw"
+        fallbackFormat="jpg"
+        alt="Kat Linux boot splash: a tabby cat biting a slice of grilled cheese under the misspelled caption 'gilld chese'."
+        class="boot__splash"
+        fetchpriority="high"
+        loading="eager"
+      />
+      <div class="boot__ui">
+        <div class="boot__menu">
+          <p class="boot__title" id="boot-title">{biosMenu.title}</p>
+          <ul class="boot__list" role="listbox" tabindex="0" aria-labelledby="boot-title" aria-activedescendant="boot-opt-0">
+            {
+              entries.map((entry, i) => (
+                <li
+                  id={`boot-opt-${i}`}
+                  role="option"
+                  aria-selected={i === 0 ? 'true' : 'false'}
+                  data-index={i}
+                  data-help={entry.help.join('\n')}
+                >
+                  {/* prettier-ignore */}
+                  {'hotkey' in entry ? <>{entry.label.replace(/ with speech$/, ' with ')}<u>s</u>peech</> : entry.label}
+                </li>
+              ))
+            }
+          </ul>
+        </div>
+        <p class="boot__tab">Press [Tab] to edit options</p>
+        <p class="boot__timeout">Automatic boot in {biosMenu.timeoutSeconds} seconds...</p>
+        <p class="boot__help" aria-live="polite">{entries[0].help.join('\n')}</p>
+      </div>
+    </div>
+  </div>
+  <figcaption id="boot-caption" class="boot__caption">
+    <span>
+      The real BIOS boot menu from the ISO. Click it or use <kbd>↑</kbd> <kbd>↓</kbd> to read each entry.
+    </span>
+    <Source path="syslinux/archiso_sys-linux.cfg" />
+  </figcaption>
+</figure>
+
+<script>
+  for (const list of document.querySelectorAll<HTMLElement>('.boot__list')) {
+    const options = Array.from(list.querySelectorAll<HTMLElement>('[role="option"]'));
+    const help = list.closest('.boot__ui')?.querySelector<HTMLElement>('.boot__help');
+    let index = 0;
+
+    const select = (next: number) => {
+      index = (next + options.length) % options.length;
+      options.forEach((opt, i) => opt.setAttribute('aria-selected', String(i === index)));
+      list.setAttribute('aria-activedescendant', options[index].id);
+      if (help) help.textContent = options[index].dataset.help ?? '';
+    };
+
+    list.addEventListener('keydown', (event) => {
+      const keys: Record<string, number> = {
+        ArrowDown: index + 1,
+        ArrowUp: index - 1,
+        Home: 0,
+        End: options.length - 1,
+      };
+      if (event.key in keys) {
+        event.preventDefault();
+        select(keys[event.key]);
+      } else if (event.key.toLowerCase() === 's') {
+        select(1);
+      }
+    });
+
+    for (const opt of options) {
+      opt.addEventListener('click', () => {
+        select(Number(opt.dataset.index));
+        list.focus({ preventScroll: true });
+      });
+      opt.addEventListener('pointerenter', (e) => {
+        if ((e as PointerEvent).pointerType === 'mouse') select(Number(opt.dataset.index));
+      });
+    }
+  }
+</script>
+
+<style>
+  .boot {
+    --ear-color: var(--screen-bezel);
+    --ear-inset: 12%;
+    display: grid;
+    gap: 0.9rem;
+    margin-inline: 0;
+    margin-bottom: 0;
+    container-type: inline-size;
+  }
+
+  .boot__bezel {
+    position: relative;
+    padding: clamp(0.6rem, 2.2cqi, 1.1rem);
+    border-radius: var(--radius-l);
+    background: var(--screen-bezel);
+    box-shadow:
+      inset 0 0 0 1px var(--screen-bezel-edge),
+      0 30px 60px -30px rgb(0 0 0 / 0.55);
+  }
+
+  .boot__screen {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    max-width: 100%;
+    overflow: hidden;
+    border-radius: 6px;
+    background: #000;
+    container-type: inline-size;
+  }
+
+  .boot__screen :global(img) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    image-rendering: auto;
+  }
+
+  /* 80x30 text grid, scaled with the screen; never smaller than 9px */
+  .boot__ui {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    grid-template-rows: 33% auto auto auto 1fr;
+    justify-items: center;
+    padding-inline: 4%;
+    font-family: var(--type-mono);
+    font-size: max(9px, 2.25cqi);
+    line-height: 1.45;
+    color: var(--screen-ink);
+  }
+
+  .boot__menu {
+    grid-row: 2;
+    width: 100%;
+    max-width: 92%;
+    background: var(--screen-menu-bg);
+    border: 1px solid rgb(255 255 255 / 0.25);
+    padding: 0.3em 0.6em 0.5em;
+  }
+
+  .boot__title {
+    text-align: center;
+    color: var(--screen-title);
+    font-weight: 700;
+    border-bottom: 1px solid rgb(255 255 255 / 0.25);
+    padding-bottom: 0.25em;
+    margin-bottom: 0.35em;
+  }
+
+  .boot__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    outline: none;
+    cursor: default;
+  }
+
+  .boot__list:focus-visible {
+    outline: 2px solid var(--screen-title);
+    outline-offset: 0.25em;
+  }
+
+  .boot__list li {
+    padding: 0 0.4em;
+    color: var(--screen-dim);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .boot__list li[aria-selected='true'] {
+    background: var(--screen-sel-bg);
+    color: #fff;
+  }
+
+  .boot__tab,
+  .boot__timeout {
+    font-size: 0.92em;
+    color: rgb(255 255 255 / 0.78);
+    text-shadow:
+      0 1px 2px #000,
+      0 0 8px #000;
+  }
+
+  .boot__tab {
+    grid-row: 3;
+    margin-top: 0.5em;
+  }
+
+  .boot__timeout {
+    grid-row: 4;
+  }
+
+  .boot__help {
+    grid-row: 5;
+    align-self: start;
+    width: 100%;
+    max-width: 92%;
+    margin-top: 0.7em;
+    min-height: 3.2em;
+    white-space: pre-line;
+    color: #fff;
+    text-shadow:
+      0 1px 2px #000,
+      0 0 6px #000;
+  }
+
+  /* narrow screens: a taller screen so the help text fits; the splash is cropped at the sides */
+  @container (max-width: 30rem) {
+    .boot__screen {
+      aspect-ratio: 3 / 3.3;
+    }
+    .boot__ui {
+      grid-template-rows: 26% auto auto auto 1fr;
+      padding-inline: 2%;
+    }
+    .boot__menu,
+    .boot__help {
+      max-width: 98%;
+    }
+  }
+
+  .boot__caption {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.25rem 1rem;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .boot__caption kbd {
+    font-size: 0.8em;
+  }
+</style>

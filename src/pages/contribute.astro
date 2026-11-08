@@ -1,0 +1,423 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import Callout from '../components/Callout.astro';
+import Source from '../components/Source.astro';
+import Icon from '../components/Icon.astro';
+import { href } from '../lib/url';
+import { links, repoFile, upstreamLeftovers } from '../data/site';
+
+const tree = [
+  { path: 'profiledef.sh', depth: 1, note: 'ISO name, label, publisher, boot modes and file permissions' },
+  { path: 'packages.x86_64', depth: 1, note: 'Every package on the live ISO, one per line' },
+  { path: 'pacman.conf', depth: 1, note: 'Repositories the ISO is built from' },
+  { path: 'bootstrap_packages', depth: 1, note: "Packages for archiso's bootstrap mode (not built today)" },
+  { path: 'airootfs/', depth: 1, note: 'Files copied onto the live system as they are' },
+  { path: 'airootfs/etc/lightdm/', depth: 2, label: 'etc/lightdm/', note: 'Greeter and autologin for archie' },
+  { path: 'airootfs/etc/skel/', depth: 2, label: 'etc/skel/', note: 'Default user settings, including the Xfce wallpaper' },
+  { path: 'airootfs/etc/systemd/', depth: 2, label: 'etc/systemd/', note: 'Services, networking and the tty1 root login' },
+  { path: 'airootfs/home/archie/', depth: 2, label: 'home/archie/', note: "The live user's home folder" },
+  {
+    path: 'airootfs/usr/share/backgrounds/kat/',
+    depth: 2,
+    label: 'usr/share/backgrounds/kat/',
+    note: 'Wallpapers',
+  },
+  { path: 'syslinux/', depth: 1, note: 'BIOS boot menu and splash.png' },
+  { path: 'efiboot/', depth: 1, note: 'UEFI boot menu (systemd-boot entries)' },
+  { path: 'grub/', depth: 1, note: 'GRUB menu and loopback.cfg' },
+  { path: '.github/workflows/', depth: 1, note: 'The Build ISO workflow' },
+];
+
+const pipeline = [
+  { name: 'Checkout', detail: 'actions/checkout' },
+  { name: 'Get database files', detail: 'pacman -Sy' },
+  { name: 'Install ArchISO', detail: 'pacman -S --noconfirm archiso' },
+  { name: 'Build the ISO', detail: 'mkarchiso . -v' },
+  { name: 'GitHub Release', detail: 'tag: latest' },
+];
+---
+
+<Base
+  title="Contribute"
+  description="How the Kat Linux archiso profile is laid out, and how to clone it, build the ISO with mkarchiso and test it with run_archiso."
+>
+  <PageHead eyebrow="Contribute" title="Build Kat Linux yourself">
+    Kat Linux is an archiso profile: a folder of config files that <code>mkarchiso</code> turns into a bootable ISO.
+    Clone it, change something, build it and boot it in a VM.
+  </PageHead>
+
+  <section class="section" aria-labelledby="map-title">
+    <div class="wrap map">
+      <div class="section-head">
+        <p class="eyebrow">Repository map</p>
+        <h2 id="map-title">Where things live</h2>
+        <p class="muted">Each path links to the file or folder on GitHub.</p>
+      </div>
+      <div class="tree" role="group" aria-label="Files in the distro repository">
+        <p class="tree__root mono">kat-linux/distro/</p>
+        <ul>
+          {
+            tree.map((t) => (
+              <li class:list={['tree__row', `depth-${t.depth}`]}>
+                <a class="mono" href={repoFile(t.path)}>
+                  {t.label ?? t.path}
+                </a>
+                <span>{t.note}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="build-title">
+    <div class="wrap split">
+      <div class="rail">
+        <p class="eyebrow">Build and test</p>
+        <h2 id="build-title">From clone to booted ISO</h2>
+        <p class="muted">You need an Arch Linux system, or an Arch container like the one CI uses.</p>
+      </div>
+      <ol class="steps build">
+        <li>
+          <h3>Install the tools</h3>
+          <p>
+            archiso provides <code>mkarchiso</code> and <code>run_archiso</code>. QEMU and the OVMF firmware let you
+            boot the result in BIOS and UEFI mode.
+          </p>
+          <CodeBlock label="On Arch Linux" code="sudo pacman -S --needed archiso git qemu-desktop edk2-ovmf" />
+        </li>
+        <li>
+          <h3>Clone the profile</h3>
+          <CodeBlock label="Clone" code={`git clone ${links.cloneUrl}\ncd distro`} />
+        </li>
+        <li>
+          <h3>Make your change</h3>
+          <p>
+            Add a package to <code>packages.x86_64</code>, drop a config file into <code>airootfs/</code>, or edit a
+            boot menu. Files in <code>airootfs/</code> land on the live system at the same path, so
+            <code>airootfs/etc/hostname</code> becomes <code>/etc/hostname</code>.
+          </p>
+        </li>
+        <li>
+          <h3>Build the ISO</h3>
+          <p>
+            This is the same command the CI runs. It needs root, takes a while, and writes to <code>work/</code> and
+            <code>out/</code>, which git ignores.
+          </p>
+          <CodeBlock label="Build" code="sudo mkarchiso -v ." />
+          <p class="muted">
+            mkarchiso skips steps it finished before, so clear the work directory before you rebuild:
+          </p>
+          <CodeBlock label="Clean before a rebuild" code="sudo rm -rf work out" />
+        </li>
+        <li>
+          <h3>Boot it in QEMU</h3>
+          <p><code>run_archiso</code> starts a VM from the ISO. Add <code>-u</code> to boot it with UEFI firmware.</p>
+          <CodeBlock
+            label="Test the ISO"
+            code={`# BIOS
+run_archiso -i out/katlinux-*-x86_64.iso
+# UEFI
+run_archiso -u -i out/katlinux-*-x86_64.iso`}
+          />
+        </li>
+        <li>
+          <h3>Open a pull request</h3>
+          <p>
+            Fork <a href={links.repo}>kat-linux/distro</a>, push a branch and open a pull request against
+            <code>main</code>. The Build ISO workflow runs on pull requests too, so your change gets built by CI.
+          </p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="ci-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Continuous integration</p>
+        <h2 id="ci-title">How a release happens</h2>
+        <p class="muted">
+          Every push to <code>main</code> runs the Build ISO workflow in an <code>archlinux:latest</code> container
+          with <code class="nobr">--privileged</code>, then attaches the ISO to the release tagged <code>latest</code>.
+        </p>
+      </div>
+      <ol class="pipeline">
+        {
+          pipeline.map((step) => (
+            <li>
+              <strong>{step.name}</strong>
+              <code>{step.detail}</code>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="pipeline__source">
+        <Source path=".github/workflows/buildiso.yml" />
+        <a href={links.actions}>Recent runs <Icon name="external" size={14} /></a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="first-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Ideas</p>
+        <h2 id="first-title">Good first contributions</h2>
+        <p class="muted">
+          Small, self-contained changes, picked from gaps you can see in the repository today. Check on
+          <a href={links.discord}>Discord</a> before you start, in case someone is already on it.
+        </p>
+      </div>
+      <ul class="ideas">
+        {
+          upstreamLeftovers.map((l) => (
+            <li>
+              <p>{l.what}</p>
+              <Source path={l.where} />
+            </li>
+          ))
+        }
+        <li>
+          <p>The live user archie can't use sudo, because the profile has no sudoers rule for the wheel group.</p>
+          <Source path="airootfs/etc/group" />
+        </li>
+        <li>
+          <p>NetworkManager and its applet ship on the ISO, but the service isn't enabled in the live session.</p>
+          <Source path="airootfs/etc/systemd/system/" />
+        </li>
+        <li>
+          <p>The release has no checksum file next to the ISO, so downloads can't be verified.</p>
+          <Source path=".github/workflows/buildiso.yml" />
+        </li>
+      </ul>
+      <Callout title="Before you send a big change">
+        <p>
+          The roadmap's bigger items, Full Appearance and the custom package manager, need a plan first. Talk it
+          through with the team on Discord and pick the <strong>Looking to Dev</strong> role while you're there.
+        </p>
+      </Callout>
+      <p class="back">
+        <a href={href('/roadmap/')}>See the roadmap <Icon name="arrow" size={16} /></a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---- repo map ---- */
+  .map {
+    display: grid;
+  }
+
+  .tree {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--card);
+    padding: clamp(1rem, 0.75rem + 1.5vw, 2rem);
+    overflow-x: auto;
+  }
+
+  .tree__root {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  .tree ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+  }
+
+  .tree__row {
+    display: grid;
+    gap: 0.1rem 1.5rem;
+    padding: 0.55rem 0;
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+
+  .tree__row:last-child {
+    border-bottom: 0;
+  }
+
+  @media (min-width: 46rem) {
+    .tree__row {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+      align-items: baseline;
+    }
+  }
+
+  .tree__row a {
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  .tree__row a:hover {
+    color: var(--nose);
+  }
+
+  .tree__row a::before {
+    content: '├─ ';
+    color: var(--ink-3);
+    font-weight: 400;
+  }
+
+  .tree__row.depth-2 a {
+    padding-left: 2.2ch;
+  }
+
+  .tree__row.depth-2 a::before {
+    content: '│  ├─ ';
+    margin-left: -2.2ch;
+  }
+
+  .tree__row span {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 45.99rem) {
+    .tree__row span {
+      padding-left: 3ch;
+    }
+
+    .tree__row.depth-2 span {
+      padding-left: 6ch;
+    }
+  }
+
+  /* ---- build steps ---- */
+  .build {
+    min-width: 0;
+  }
+
+  .build p {
+    max-width: var(--measure);
+  }
+
+  .build .muted {
+    font-size: var(--step--1);
+  }
+
+  /* ---- pipeline ---- */
+  .pipeline {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    counter-reset: job;
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  @media (min-width: 60rem) {
+    .pipeline {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 0;
+    }
+  }
+
+  .pipeline li {
+    counter-increment: job;
+    position: relative;
+    display: grid;
+    gap: 0.4rem;
+    align-content: start;
+    padding: 1rem 1.1rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    background: var(--card);
+  }
+
+  @media (min-width: 60rem) {
+    .pipeline li {
+      border-radius: 0;
+      margin-left: -1.5px;
+    }
+
+    .pipeline li:first-child {
+      border-radius: var(--radius-m) 0 0 var(--radius-m);
+      margin-left: 0;
+    }
+
+    .pipeline li:last-child {
+      border-radius: 0 var(--radius-m) var(--radius-m) 0;
+      border-color: var(--nose);
+      background: var(--nose-tint);
+      z-index: 1;
+    }
+  }
+
+  .pipeline li::before {
+    content: counter(job, decimal-leading-zero);
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 700;
+    color: var(--nose);
+  }
+
+  .pipeline strong {
+    font-weight: 700;
+  }
+
+  .pipeline code {
+    font-size: var(--step--2);
+    justify-self: start;
+  }
+
+  .pipeline__source {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+
+  .pipeline__source a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: var(--step--1);
+  }
+
+  /* ---- ideas ---- */
+  .ideas {
+    list-style: none;
+    padding: 0;
+    margin: 0 0 2rem;
+    display: grid;
+    gap: 0 2.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  @media (min-width: 48rem) {
+    .ideas {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .ideas li {
+    display: grid;
+    gap: 0.3rem;
+    align-content: start;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .back {
+    margin-top: 1.5rem;
+  }
+
+  .back a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+  }
+</style>

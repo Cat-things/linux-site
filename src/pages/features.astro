@@ -1,0 +1,510 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Source from '../components/Source.astro';
+import Icon from '../components/Icon.astro';
+import helloThere from '../assets/wallpaper-hello-there.png';
+import wires from '../assets/wallpaper-wires.png';
+import splash from '../assets/boot-splash.png';
+import { href } from '../lib/url';
+import { repoFile } from '../data/site';
+import { packageGroups, packageCount, archPackageSearch } from '../data/packages';
+
+const notable = new Set([
+  'xfce4',
+  'lightdm-slick-greeter',
+  'firefox',
+  'kitty',
+  'pipewire',
+  'linux',
+  'archinstall',
+  'reflector',
+  'memtest86+',
+  'btrfs-progs',
+  'cryptsetup',
+  'clonezilla',
+  'testdisk',
+  'iwd',
+  'networkmanager',
+  'nmap',
+  'qemu-guest-agent',
+  'zsh',
+  'espeakup',
+]);
+
+const plates = [
+  {
+    label: 'Base',
+    value: 'Arch Linux',
+    text: 'Built with archiso from the official core, extra and multilib repositories, on the stock linux kernel with AMD and Intel microcode.',
+    source: ['pacman.conf', 'packages.x86_64'],
+  },
+  {
+    label: 'Desktop',
+    value: 'Xfce',
+    text: 'xfce4 and xfce4-goodies on Xorg, with Firefox, the kitty terminal and PipeWire audio on the live ISO.',
+    source: ['packages.x86_64'],
+  },
+  {
+    label: 'Display manager',
+    value: 'LightDM',
+    text: 'With Slick Greeter. On the live ISO it logs the user archie straight into an Xfce session.',
+    source: ['airootfs/etc/lightdm/lightdm.conf'],
+  },
+  {
+    label: 'Release model',
+    value: 'Rolling',
+    text: 'No numbered releases. Every push to main builds a date-stamped ISO, and installed systems follow Arch updates through pacman.',
+    source: ['.github/workflows/buildiso.yml'],
+  },
+];
+---
+
+<Base
+  title="What's inside"
+  description={`The base, desktop, display manager and release model of Kat Linux, plus all ${packageCount} packages on the live ISO, grouped by what they do.`}
+>
+  <PageHead eyebrow="What's inside" title="Everything on the ISO">
+    Kat Linux is Arch Linux underneath with a ready-made live desktop on top. Here is the base, the desktop, the
+    artwork and all {packageCount} packages the ISO ships, taken straight from <a href={repoFile('packages.x86_64')}
+      ><code>packages.x86_64</code></a
+    >.
+  </PageHead>
+
+  <section class="section" aria-labelledby="overview-title">
+    <div class="wrap">
+      <h2 id="overview-title" class="visually-hidden">Overview</h2>
+      <div class="plates">
+        {
+          plates.map((p) => (
+            <article class="plate">
+              <p class="plate__label">{p.label}</p>
+              <p class="plate__value">{p.value}</p>
+              <p class="plate__text">{p.text}</p>
+              <Source path={p.source} />
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="look-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Look &amp; feel</p>
+        <h2 id="look-title">The cats so far</h2>
+        <p class="muted">
+          Three images make up the Kat Linux look today. More is on the way: “Full Appearance” is the next open item on
+          the <a href={href('/roadmap/')}>roadmap</a>.
+        </p>
+      </div>
+      <div class="gallery">
+        <figure class="shot shot--main">
+          <Picture
+            src={helloThere}
+            formats={['avif', 'webp']}
+            widths={[480, 800, 1200]}
+            sizes="(min-width: 60rem) 46rem, 100vw"
+            fallbackFormat="jpg"
+            loading="lazy"
+            alt="Wallpaper: a wide-eyed ginger kitten looking up into the camera under the caption 'hello there'."
+          />
+          <figcaption>
+            <strong>default.png</strong>
+            <span>The default wallpaper on every workspace of the live desktop.</span>
+            <Source path="airootfs/usr/share/backgrounds/kat/default.png" />
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <Picture
+            src={wires}
+            formats={['avif', 'webp']}
+            widths={[400, 800]}
+            sizes="(min-width: 60rem) 24rem, 100vw"
+            fallbackFormat="jpg"
+            loading="lazy"
+            alt="Wallpaper: a grey and white cat pressing its face close to the camera, staring straight at you."
+          />
+          <figcaption>
+            <strong>wires.png</strong>
+            <span>A second wallpaper in the same folder, ready to pick in Xfce's Desktop settings.</span>
+            <Source path="airootfs/usr/share/backgrounds/kat/wires.png" />
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <Picture
+            src={splash}
+            formats={['avif', 'webp']}
+            widths={[400, 640]}
+            sizes="(min-width: 60rem) 24rem, 100vw"
+            fallbackFormat="jpg"
+            loading="lazy"
+            alt="Boot splash: a tabby cat biting a slice of grilled cheese under the misspelled caption 'gilld chese'."
+          />
+          <figcaption>
+            <strong>splash.png</strong>
+            <span>The background of the BIOS boot menu.</span>
+            <Source path="syslinux/splash.png" />
+          </figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="packages-title">
+    <div class="wrap">
+      <div class="pkg-head">
+        <div class="section-head">
+          <p class="eyebrow">Packages</p>
+          <h2 id="packages-title">All {packageCount} packages, by job</h2>
+          <p class="muted">
+            Highlighted names are the ones most people will notice. Each name links to its page on the Arch Linux
+            package search.
+          </p>
+        </div>
+        <search class="pkg-filter" hidden>
+          <label for="pkg-q">Filter packages</label>
+          <input id="pkg-q" type="search" placeholder="e.g. btrfs, wifi, vpn" autocomplete="off" spellcheck="false" />
+          <p class="pkg-count" aria-live="polite">Showing all {packageCount}</p>
+        </search>
+      </div>
+
+      <nav class="pkg-jump" aria-label="Package groups">
+        {packageGroups.map((g) => <a href={`#pkg-${g.id}`}>{g.title}</a>)}
+      </nav>
+
+      <div class="groups">
+        {
+          packageGroups.map((g) => (
+            <section class="group" id={`pkg-${g.id}`} aria-labelledby={`pkg-${g.id}-title`}>
+              <header class="group__head">
+                <h3 id={`pkg-${g.id}-title`}>{g.title}</h3>
+                <span class="group__count mono">{g.packages.length}</span>
+              </header>
+              <p class="group__blurb" data-blurb>
+                {g.blurb}
+              </p>
+              <ul class="pkgs">
+                {g.packages.map((name) => (
+                  <li data-name={name} data-group={`${g.title} ${g.blurb}`.toLowerCase()}>
+                    <a class:list={['pkg', { 'pkg--notable': notable.has(name) }]} href={archPackageSearch(name)}>
+                      {name}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))
+        }
+      </div>
+      <p class="pkg-empty" hidden>No packages match that filter.</p>
+      <p class="pkg-source">
+        <Source path="packages.x86_64" />
+        <a class="more" href={href('/contribute/')}>Want something added? <Icon name="arrow" size={16} /></a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<script>
+  const filter = document.querySelector<HTMLElement>('.pkg-filter');
+  const input = document.querySelector<HTMLInputElement>('#pkg-q');
+  const count = document.querySelector<HTMLElement>('.pkg-count');
+  const empty = document.querySelector<HTMLElement>('.pkg-empty');
+  const groups = Array.from(document.querySelectorAll<HTMLElement>('.group'));
+  const total = document.querySelectorAll('.pkgs li').length;
+
+  if (filter && input && count && empty) {
+    filter.hidden = false;
+    let timer = 0;
+
+    const apply = () => {
+      const q = input.value.trim().toLowerCase();
+      let shown = 0;
+      for (const group of groups) {
+        let inGroup = 0;
+        for (const li of group.querySelectorAll<HTMLElement>('.pkgs li')) {
+          const match = !q || li.dataset.name!.includes(q) || li.dataset.group!.includes(q);
+          li.hidden = !match;
+          if (match) inGroup++;
+        }
+        group.hidden = inGroup === 0;
+        shown += inGroup;
+      }
+      empty.hidden = shown !== 0;
+      window.clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        count.textContent = q ? `Showing ${shown} of ${total}` : `Showing all ${total}`;
+      }, 250);
+    };
+
+    input.addEventListener('input', apply);
+  }
+</script>
+
+<style>
+  /* ---- overview plates ---- */
+  .plates {
+    display: grid;
+    border-top: 2px solid var(--ink);
+  }
+
+  @media (min-width: 40rem) {
+    .plates {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  .plate {
+    display: grid;
+    gap: 0.5rem;
+    align-content: start;
+    padding: 1.5rem 1.5rem 1.75rem 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 40rem) {
+    .plate {
+      padding: 1.75rem 2rem 2rem;
+    }
+
+    .plate:nth-child(odd) {
+      padding-left: 0;
+    }
+
+    .plate:nth-child(even) {
+      border-left: 1px solid var(--line);
+    }
+  }
+
+  .plate__label {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--nose);
+  }
+
+  .plate__value {
+    font-family: var(--type-display);
+    font-size: var(--step-3);
+    font-weight: 800;
+    font-stretch: 118%;
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+
+  .plate__text {
+    color: var(--ink-2);
+    max-width: 44ch;
+  }
+
+  /* ---- gallery ---- */
+  .gallery {
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 52rem) {
+    .gallery {
+      grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
+      grid-template-rows: auto auto;
+    }
+
+    .shot--main {
+      grid-row: span 2;
+    }
+  }
+
+  .shot {
+    display: grid;
+    gap: 0.7rem;
+    align-content: start;
+    min-width: 0;
+  }
+
+  .shot :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--line);
+    background: var(--well);
+  }
+
+  .shot figcaption {
+    display: grid;
+    gap: 0.15rem;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .shot strong {
+    font-family: var(--type-mono);
+    color: var(--ink);
+  }
+
+  /* ---- packages ---- */
+  .pkg-head {
+    display: grid;
+    gap: 1rem 3rem;
+    align-items: end;
+  }
+
+  @media (min-width: 60rem) {
+    .pkg-head {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 22rem);
+    }
+  }
+
+  .pkg-head .section-head {
+    margin-bottom: 0;
+  }
+
+  .pkg-filter {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .pkg-filter label {
+    font-weight: 700;
+  }
+
+  .pkg-filter input {
+    width: 100%;
+    min-height: 2.9rem;
+    padding: 0.5rem 0.85rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    background: var(--card);
+    color: var(--ink);
+    font: 500 var(--step-0) / 1.2 var(--type-mono);
+  }
+
+  .pkg-filter input::placeholder {
+    color: var(--ink-3);
+  }
+
+  .pkg-filter input:focus-visible {
+    border-color: var(--focus);
+  }
+
+  .pkg-count {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .pkg-jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-block: 2rem 2.5rem;
+  }
+
+  .pkg-jump a {
+    padding: 0.3rem 0.7rem;
+    border: 1px solid var(--line-strong);
+    border-radius: 999px;
+    color: var(--ink-2);
+    text-decoration: none;
+    font-size: var(--step--1);
+  }
+
+  .pkg-jump a:hover {
+    color: var(--nose);
+    border-color: var(--nose);
+  }
+
+  .groups {
+    display: grid;
+    gap: 0 3rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 22rem), 1fr));
+  }
+
+  .group {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    padding-block: 1.5rem 2rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .group__head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .group__count {
+    font-size: var(--step--1);
+    color: var(--ink-3);
+  }
+
+  .group__blurb {
+    color: var(--ink-2);
+    font-size: var(--step--1);
+  }
+
+  .pkgs {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .pkg {
+    display: inline-block;
+    padding: 0.2rem 0.5rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-s);
+    background: var(--card);
+    color: var(--ink);
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    text-decoration: none;
+  }
+
+  .pkg:hover {
+    border-color: var(--nose);
+    color: var(--nose);
+  }
+
+  .pkg--notable {
+    border-color: var(--nose);
+    background: var(--nose-tint);
+    font-weight: 700;
+  }
+
+  .pkg-empty {
+    padding: 2rem 0;
+    color: var(--ink-2);
+  }
+
+  .pkg-source {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .more:hover {
+    text-decoration: underline;
+  }
+</style>

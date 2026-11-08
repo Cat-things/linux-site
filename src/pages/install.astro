@@ -1,0 +1,412 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Callout from '../components/Callout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import Source from '../components/Source.astro';
+import { href } from '../lib/url';
+import { links, repoFile } from '../data/site';
+
+const session = [
+  {
+    term: 'User',
+    value: 'archie, logged in automatically by LightDM. No password is set for it on the ISO.',
+    source: 'airootfs/etc/lightdm/lightdm.conf',
+  },
+  {
+    term: 'Desktop',
+    value: 'Xfce, with the Kat Linux wallpaper on every workspace.',
+    source: 'airootfs/etc/skel/.config/xfce4/xfconf/xfce-perchannel-xml/xfce4-desktop.xml',
+  },
+  {
+    term: 'Root console',
+    value: 'The first virtual console (tty1) logs in as root automatically.',
+    source: 'airootfs/etc/systemd/system/getty@tty1.service.d/autologin.conf',
+  },
+  {
+    term: 'Hostname',
+    value: 'katlinux',
+    source: 'airootfs/etc/hostname',
+  },
+  {
+    term: 'Shell',
+    value: 'Zsh with grml-zsh-config, for root and archie.',
+    source: 'airootfs/etc/passwd',
+  },
+  {
+    term: 'Wired network',
+    value: 'Connects on its own over DHCP, through systemd-networkd.',
+    source: 'airootfs/etc/systemd/network/20-ethernet.network',
+  },
+  {
+    term: 'Wi-Fi & mobile',
+    value: 'Wi-Fi through iwd (iwctl), mobile broadband through ModemManager (mmcli).',
+    source: 'airootfs/etc/motd',
+  },
+  {
+    term: 'Power',
+    value: 'Suspend, hibernate and lid-close are ignored, so the machine stays awake during an install.',
+    source: 'airootfs/etc/systemd/logind.conf.d/do-not-suspend.conf',
+  },
+];
+
+const archinstallChoices = [
+  ['Mirrors', 'Pick your region so downloads come from nearby servers.'],
+  ['Disk configuration', 'Choose the target disk and a partition layout. The default layout erases that disk.'],
+  ['Disk encryption', 'Optional. Set a passphrase here if you want LUKS full-disk encryption.'],
+  ['Bootloader', 'systemd-boot or GRUB on UEFI PCs, GRUB on BIOS PCs.'],
+  ['Hostname', 'Anything you like. The live ISO uses katlinux.'],
+  ['Authentication', 'Set a root password and create your user. Make that user a superuser so it can use sudo.'],
+  ['Profile', 'Desktop → Xfce4 gives you the same desktop as the live session.'],
+  ['Audio', 'PipeWire, the same sound server the live ISO uses.'],
+  ['Network configuration', 'NetworkManager, so the installed desktop can manage Wi-Fi and wired connections.'],
+  ['Additional packages', 'firefox kitty, if you want the same apps as the live session.'],
+  ['Optional repositories', 'multilib, if you need 32-bit packages such as older games.'],
+  ['Timezone', 'Your local timezone. Then choose Install.'],
+];
+---
+
+<Base
+  title="Install guide"
+  description="Boot the Kat Linux live ISO, get to know the live session, and install with archinstall step by step."
+>
+  <PageHead eyebrow="Install guide" title="From USB stick to installed system">
+    Boot the live ISO, look around, then install with archinstall. If you haven't made a USB stick yet, start on the <a
+      href={href('/download/')}>download page</a
+    >.
+  </PageHead>
+
+  <div class="section">
+    <div class="wrap split">
+      <nav class="rail" aria-label="On this page">
+        <p class="eyebrow">On this page</p>
+        <ol class="toc">
+          <li><a href="#boot">Boot the live ISO</a></li>
+          <li><a href="#live">The live session</a></li>
+          <li><a href="#archinstall">Install with archinstall</a></li>
+          <li><a href="#after">After installing</a></li>
+        </ol>
+      </nav>
+
+      <div class="guide">
+        <Callout title="What installing means today">
+          <p>
+            archinstall installs Arch Linux packages from the official repositories with the options you pick. The
+            Kat Linux look from the live session, like the wallpaper and greeter settings, isn't copied to the
+            installed system yet.
+          </p>
+        </Callout>
+
+        <section id="boot" aria-labelledby="boot-title" class="block">
+          <h2 id="boot-title">Boot the live ISO</h2>
+          <ol class="steps">
+            <li>
+              <h3>Open your PC's boot menu</h3>
+              <p>
+                Plug in the stick, power on, and press the one-time boot menu key (often <kbd>F12</kbd>,
+                <kbd>F11</kbd>, <kbd>F8</kbd> or <kbd>Esc</kbd>). Choose the USB stick. If nothing happens, check that
+                Secure Boot is off.
+              </p>
+            </li>
+            <li>
+              <h3>Pick the first entry</h3>
+              <p>
+                On older BIOS PCs you'll see the Kat Linux menu with the boot splash; choose <code
+                  >Kat Linux install medium (x86_64, BIOS)</code
+                >. On UEFI PCs the entry is still called <code>Arch Linux install medium (x86_64, UEFI)</code>. Either
+                one boots on its own after 15 seconds.
+              </p>
+              <p class="muted">
+                Need speech output? Choose the entry ending in “with speech” to start the speakup screen reader.
+              </p>
+              <Source path={['syslinux/archiso_sys-linux.cfg', 'efiboot/loader/entries/']} />
+            </li>
+            <li>
+              <h3>Wait for the desktop</h3>
+              <p>
+                LightDM starts Xfce and logs you in as <code>archie</code>. There's nothing to type. The “hello there”
+                kitten on the wallpaper means you made it.
+              </p>
+            </li>
+          </ol>
+        </section>
+
+        <section id="live" aria-labelledby="live-title" class="block">
+          <h2 id="live-title">The live session</h2>
+          <p class="block__intro">
+            Everything runs from the USB stick and RAM. Changes you make are gone after a reboot, so it's safe to poke
+            around.
+          </p>
+          <dl class="session">
+            {
+              session.map((row) => (
+                <div class="session__row">
+                  <dt>{row.term}</dt>
+                  <dd>
+                    <span>{row.value}</span>
+                    <Source path={row.source} />
+                  </dd>
+                </div>
+              ))
+            }
+          </dl>
+          <Callout tone="warning" title="Two gaps to know about">
+            <p>
+              The profile doesn't give <code>archie</code> sudo rights yet, so <code>sudo</code> from the desktop
+              terminal won't get you root. Use the root console on tty1 instead, as described below.
+            </p>
+            <p>
+              NetworkManager and its tray applet are on the ISO, but the NetworkManager service isn't enabled in the
+              live session. Use <code>iwctl</code> for Wi-Fi.
+            </p>
+          </Callout>
+        </section>
+
+        <section id="archinstall" aria-labelledby="archinstall-title" class="block">
+          <h2 id="archinstall-title">Install with archinstall</h2>
+          <ol class="steps">
+            <li>
+              <h3>Switch to the root console</h3>
+              <p>
+                archinstall needs root. Press <kbd>Ctrl</kbd> + <kbd>Alt</kbd> + <kbd>F1</kbd> to reach tty1, where
+                root is already logged in. You can return to the desktop later with <kbd>Ctrl</kbd> + <kbd>Alt</kbd> +
+                <kbd>F7</kbd>.
+              </p>
+            </li>
+            <li>
+              <h3>Get online</h3>
+              <p>A network cable just works. For Wi-Fi, find your device name, then scan and connect:</p>
+              <CodeBlock
+                label="Wi-Fi with iwctl"
+                prompt="#"
+                code={`iwctl device list
+iwctl station wlan0 scan
+iwctl station wlan0 get-networks
+iwctl station wlan0 connect "Your Network"`}
+              />
+              <p>Replace <code>wlan0</code> with your device name, then check the connection:</p>
+              <CodeBlock label="Check the connection" prompt="#" code="ping -c 3 archlinux.org" />
+            </li>
+            <li>
+              <h3>Start archinstall</h3>
+              <CodeBlock label="Run the installer" prompt="#" code="archinstall" />
+              <p>It opens a menu. Move with the arrow keys and confirm with <kbd>Enter</kbd>.</p>
+            </li>
+            <li>
+              <h3>Work through the menu</h3>
+              <p>
+                These are the settings to look at. archinstall's wording changes between versions, so the labels may
+                differ slightly.
+              </p>
+              <div class="table-scroll" tabindex="0" role="region" aria-label="Suggested archinstall choices">
+                <table>
+                  <caption class="visually-hidden">Suggested archinstall choices</caption>
+                  <thead>
+                    <tr><th scope="col">Setting</th><th scope="col">What to choose</th></tr>
+                  </thead>
+                  <tbody>
+                    {
+                      archinstallChoices.map(([setting, choice]) => (
+                        <tr>
+                          <th scope="row">{setting}</th>
+                          <td>{choice}</td>
+                        </tr>
+                      ))
+                    }
+                  </tbody>
+                </table>
+              </div>
+              <Callout tone="danger" title="The disk you pick gets erased">
+                <p>
+                  Choosing a default partition layout wipes the whole target disk. Back up first, and if you dual-boot,
+                  read the Arch wiki on <a href="https://wiki.archlinux.org/title/Dual_boot_with_Windows"
+                    >dual booting</a
+                  > before you choose a layout.
+                </p>
+              </Callout>
+            </li>
+            <li>
+              <h3>Install and reboot</h3>
+              <p>
+                Choose <strong>Install</strong> and wait for it to finish. When it asks whether to chroot into the new
+                system, say no unless you have something to change. Then reboot and unplug the stick when the screen
+                goes dark.
+              </p>
+              <CodeBlock label="Reboot" prompt="#" code="reboot" />
+            </li>
+          </ol>
+
+          <details class="ssh">
+            <summary>Install from another computer over SSH</summary>
+            <div class="ssh__body">
+              <p>
+                The live ISO runs an SSH server that allows root logins with a password. Root has no password by
+                default, so set one on tty1 first, then look up the IP address:
+              </p>
+              <CodeBlock label="On the live ISO" prompt="#" code={`passwd\nip -brief address`} />
+              <p>Then connect from the other computer and run <code>archinstall</code> there:</p>
+              <CodeBlock label="On your other computer" code="ssh root@192.168.1.50" />
+              <p class="muted">Use the address you found instead of the example.</p>
+              <Source path="airootfs/etc/ssh/sshd_config.d/10-archiso.conf" />
+            </div>
+          </details>
+        </section>
+
+        <section id="after" aria-labelledby="after-title" class="block">
+          <h2 id="after-title">After installing</h2>
+          <ul class="after">
+            <li>
+              <h3>Update everything</h3>
+              <p>Your system follows Arch's rolling updates. Update regularly, and read the output before you agree.</p>
+              <CodeBlock label="Full system update" code="sudo pacman -Syu" />
+            </li>
+            <li>
+              <h3>Bring the cats along</h3>
+              <p>
+                The wallpapers aren't installed for you yet. Grab <code>default.png</code> and <code>wires.png</code>
+                from <a href={repoFile('airootfs/usr/share/backgrounds/kat/')}>the repository</a> and set one in Xfce's
+                Desktop settings.
+              </p>
+            </li>
+            <li>
+              <h3>Learn the Arch way</h3>
+              <p>
+                Kat Linux is Arch underneath, so the <a href="https://wiki.archlinux.org/title/General_recommendations"
+                  >Arch wiki's general recommendations</a
+                > apply as written. For AUR packages, see the <a href={`${href('/faq/')}#aur`}>FAQ</a>.
+              </p>
+            </li>
+            <li>
+              <h3>Tell us how it went</h3>
+              <p>
+                Say hi on <a href={links.discord}>Discord</a>, and <a href={links.issues}>open an issue</a> if something
+                broke. Include the ISO's file name so we know which build you used.
+              </p>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .guide {
+    display: grid;
+    gap: clamp(3rem, 2rem + 3vw, 4.5rem);
+    min-width: 0;
+    max-width: 50rem;
+  }
+
+  .block {
+    display: grid;
+    gap: 1.5rem;
+    min-width: 0;
+  }
+
+  .block > h2 {
+    padding-bottom: 0.75rem;
+    border-bottom: 2px solid var(--ink);
+  }
+
+  .block__intro {
+    color: var(--ink-2);
+    max-width: var(--measure);
+  }
+
+  .steps p {
+    max-width: var(--measure);
+  }
+
+  .steps .muted {
+    font-size: var(--step--1);
+  }
+
+  .session {
+    display: grid;
+    border-top: 1px solid var(--line);
+  }
+
+  .session__row {
+    display: grid;
+    gap: 0.2rem 1.5rem;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 40rem) {
+    .session__row {
+      grid-template-columns: 9rem minmax(0, 1fr);
+    }
+  }
+
+  .session dt {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nose);
+    padding-top: 0.2rem;
+  }
+
+  .session dd {
+    margin: 0;
+    display: grid;
+    gap: 0.2rem;
+    min-width: 0;
+  }
+
+  tbody th {
+    font-family: var(--type-body);
+    font-size: var(--step--1);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+    font-weight: 700;
+    background: none;
+    white-space: nowrap;
+  }
+
+  .ssh {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--card);
+  }
+
+  .ssh summary {
+    cursor: pointer;
+    padding: 1rem 1.15rem;
+    font-weight: 700;
+    list-style-position: inside;
+  }
+
+  .ssh summary::marker {
+    color: var(--nose);
+  }
+
+  .ssh__body {
+    display: grid;
+    gap: 0.9rem;
+    padding: 0 1.15rem 1.25rem;
+  }
+
+  .after {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.75rem;
+  }
+
+  .after li {
+    display: grid;
+    gap: 0.6rem;
+    min-width: 0;
+  }
+
+  .after p {
+    color: var(--ink-2);
+    max-width: var(--measure);
+  }
+</style>

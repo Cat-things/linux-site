@@ -1,0 +1,644 @@
+---
+import { Picture } from 'astro:assets';
+import Base from '../layouts/Base.astro';
+import BootMenu from '../components/BootMenu.astro';
+import Icon from '../components/Icon.astro';
+import Source from '../components/Source.astro';
+import wallpaper from '../assets/wallpaper-hello-there.png';
+import { href } from '../lib/url';
+import { links, iso } from '../data/site';
+import { devlog, formatDate } from '../data/devlog';
+import { packageCount } from '../data/packages';
+
+const pedigree = [
+  {
+    label: 'Base',
+    value: 'Arch Linux. The ISO is built from the official core, extra and multilib repositories.',
+    source: 'pacman.conf',
+  },
+  {
+    label: 'Release model',
+    value: 'Rolling, like Arch. The ISO is rebuilt and date-stamped on every push to main.',
+    source: '.github/workflows/buildiso.yml',
+  },
+  {
+    label: 'Live desktop',
+    value: 'Xfce with xfce4-goodies, running on Xorg.',
+    source: 'packages.x86_64',
+  },
+  {
+    label: 'Login',
+    value: 'LightDM with Slick Greeter, which logs the live user archie in automatically.',
+    source: 'airootfs/etc/lightdm/lightdm.conf',
+  },
+  {
+    label: 'Installer',
+    value: 'archinstall, the guided installer from the Arch project.',
+    source: 'packages.x86_64',
+  },
+  {
+    label: 'Boots on',
+    value: 'BIOS through syslinux and UEFI through systemd-boot. x86_64 only.',
+    source: 'profiledef.sh',
+  },
+  {
+    label: 'Shell',
+    value: 'Zsh with the grml configuration, for both root and archie.',
+    source: 'airootfs/etc/passwd',
+  },
+  {
+    label: 'License',
+    value: 'GNU General Public License v3.',
+    source: 'LICENSE',
+  },
+];
+
+const latest = devlog.slice(0, 3);
+---
+
+<Base
+  home
+  title="Kat Linux"
+  description="Kat Linux is a cat-themed Linux distro built on Arch Linux. Download the live ISO, boot into Xfce and install with archinstall."
+>
+  <section class="hero">
+    <div class="wrap hero__grid">
+      <div class="hero__copy">
+        <p class="chip chip-iris chip-dot">Early development</p>
+        <h1 class="hero__name">Kat Linux</h1>
+        <p class="hero__tagline">Arch underneath. Cats on top.</p>
+        <p class="lede">
+          A cat-themed Linux distro built on Arch Linux. The live ISO boots straight into an Xfce desktop, and
+          archinstall is waiting when you want to install.
+        </p>
+        <div class="hero__actions">
+          <a class="btn btn-primary btn-big" href={href('/download/')}>
+            <Icon name="download" />
+            Download the ISO
+          </a>
+          <a class="btn btn-big" href={href('/install/')}>Install guide</a>
+        </div>
+        <ul class="hero__facts" aria-label="ISO at a glance">
+          <li><span>arch</span>{iso.arch}</li>
+          <li><span>boot</span>BIOS + UEFI</li>
+          <li><span>build</span>every push to main</li>
+        </ul>
+      </div>
+      <div class="hero__screen">
+        <BootMenu />
+      </div>
+    </div>
+  </section>
+
+  <section class="section pedigree" aria-labelledby="pedigree-title">
+    <div class="wrap pedigree__grid">
+      <div class="section-head">
+        <p class="eyebrow">Pedigree</p>
+        <h2 id="pedigree-title">What Kat Linux is made of</h2>
+        <p class="muted">
+          Every line points at the file in the distro repository that it comes from, so you can check our work.
+        </p>
+        <a class="more" href={href('/features/')}>See all {packageCount} packages <Icon name="arrow" size={18} /></a>
+      </div>
+      <dl class="spec">
+        {
+          pedigree.map((row) => (
+            <div class="spec__row">
+              <dt>{row.label}</dt>
+              <dd>
+                <span>{row.value}</span>
+                <Source path={row.source} />
+              </dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <section class="section why" aria-labelledby="why-title">
+    <div class="wrap why__grid">
+      <div class="why__head section-head">
+        <p class="eyebrow">Why boot it</p>
+        <h2 id="why-title">A live USB you can actually live in</h2>
+      </div>
+      <figure class="why__shot">
+        <Picture
+          src={wallpaper}
+          formats={['avif', 'webp']}
+          widths={[480, 800, 1200, 1600]}
+          sizes="(min-width: 66rem) 40rem, 100vw"
+          fallbackFormat="jpg"
+          alt="The default Kat Linux wallpaper: a wide-eyed ginger kitten looking up into the camera under the caption 'hello there'."
+          loading="lazy"
+        />
+        <figcaption>
+          <span>The first thing the live session shows you: <code>default.png</code>, set on every workspace.</span>
+          <Source path="airootfs/usr/share/backgrounds/kat/" />
+        </figcaption>
+      </figure>
+      <ul class="why__list">
+        <li>
+          <h3>A desktop on the live ISO</h3>
+          <p>
+            It boots into Xfce with Firefox, the kitty terminal and PipeWire sound, so you can read docs and keep a
+            chat open while you install.
+          </p>
+        </li>
+        <li>
+          <h3>Arch where it counts</h3>
+          <p>
+            pacman, the official repositories and the AUR work the way the Arch wiki describes. There is no extra
+            layer to learn.
+          </p>
+        </li>
+        <li>
+          <h3>A rescue kit on the same stick</h3>
+          <p>
+            Clonezilla, TestDisk, ddrescue, partclone, smartmontools and Memtest86+ are all on the ISO, along with
+            tools for nearly every filesystem.
+          </p>
+        </li>
+        <li>
+          <h3>Built in the open</h3>
+          <p>
+            Each push to main builds a fresh ISO on GitHub Actions. The whole profile is one GPL-licensed repository
+            you can read in an afternoon.
+          </p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section news" aria-labelledby="news-title">
+    <div class="wrap">
+      <div class="news__head">
+        <div class="section-head">
+          <p class="eyebrow">Devlog</p>
+          <h2 id="news-title">Latest from the repo</h2>
+        </div>
+        <a class="more" href={href('/devlog/')}>All entries <Icon name="arrow" size={18} /></a>
+      </div>
+      <ol class="news__list">
+        {
+          latest.map((entry) => (
+            <li>
+              <article class="news__item">
+                <p class="news__date">
+                  <time datetime={entry.date}>{formatDate(entry.date)}</time>
+                  <span>
+                    {entry.commits.length} commit{entry.commits.length === 1 ? '' : 's'}
+                  </span>
+                </p>
+                <h3>
+                  <a href={`${href('/devlog/')}#${entry.slug}`}>{entry.title}</a>
+                </h3>
+                <p>{entry.summary}</p>
+              </article>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="community" aria-labelledby="community-title">
+    <div class="wrap community__inner">
+      <div class="community__copy">
+        <p class="eyebrow">Community</p>
+        <h2 id="community-title">We're looking for devs</h2>
+        <p>
+          Kat Linux is a small project and there is plenty left to build. If you want to help, join the Discord and
+          add the <strong>Looking to Dev</strong> role during onboarding.
+        </p>
+      </div>
+      <div class="community__actions">
+        <a class="btn btn-primary btn-big" href={links.discord}>
+          <Icon name="chat" />
+          Join the Discord
+        </a>
+        <a class="btn btn-big btn-onband" href={links.org}>
+          <Icon name="git" />
+          kat-linux on GitHub
+        </a>
+        <a class="community__small" href={href('/contribute/')}>How to build the ISO yourself</a>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  /* ---- hero ---- */
+  .hero {
+    padding-block: clamp(2.5rem, 1.5rem + 4vw, 5.5rem) clamp(3.5rem, 2rem + 5vw, 6.5rem);
+    background:
+      radial-gradient(circle at 1px 1px, var(--line) 1px, transparent 0) 0 0 / 22px 22px,
+      var(--paper);
+    border-bottom: 1px solid var(--line);
+    overflow: clip;
+  }
+
+  .hero__grid {
+    display: grid;
+    gap: clamp(2.5rem, 1rem + 5vw, 4.5rem);
+    align-items: center;
+  }
+
+  @media (min-width: 66rem) {
+    .hero__grid {
+      grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    }
+  }
+
+  .hero__copy {
+    display: grid;
+    gap: 1.25rem;
+    justify-items: start;
+    min-width: 0;
+  }
+
+  .hero__name {
+    font-size: var(--step-5);
+    font-weight: 880;
+    font-stretch: 128%;
+    letter-spacing: -0.035em;
+    line-height: 0.88;
+    margin-top: 0.25rem;
+  }
+
+  @media (max-width: 26rem) {
+    .hero__name {
+      font-stretch: 112%;
+    }
+  }
+
+  .hero__tagline {
+    font-family: var(--type-display);
+    font-size: var(--step-3);
+    font-weight: 650;
+    font-stretch: 110%;
+    line-height: 1.1;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  .hero__tagline::first-line {
+    color: var(--ink);
+  }
+
+  .hero .lede {
+    font-size: var(--step-1);
+  }
+
+  .hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.9rem;
+    margin-top: 0.5rem;
+  }
+
+  .hero__facts {
+    list-style: none;
+    padding: 0;
+    margin: 0.25rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 1.5rem;
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    color: var(--ink);
+  }
+
+  .hero__facts span {
+    color: var(--ink-3);
+    margin-right: 0.5em;
+  }
+
+  .hero__screen {
+    min-width: 0;
+  }
+
+  /* ---- pedigree ---- */
+  .pedigree__grid {
+    display: grid;
+    gap: 2rem;
+  }
+
+  @media (min-width: 60rem) {
+    .pedigree__grid {
+      grid-template-columns: minmax(0, 20rem) minmax(0, 1fr);
+      gap: 4rem;
+      align-items: start;
+    }
+
+    .pedigree .section-head {
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-weight: 700;
+    text-decoration: none;
+    width: fit-content;
+  }
+
+  .more:hover {
+    text-decoration: underline;
+  }
+
+  .spec {
+    border-top: 2px solid var(--ink);
+  }
+
+  .spec__row {
+    display: grid;
+    gap: 0.35rem 2rem;
+    padding-block: 1.1rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (min-width: 40rem) {
+    .spec__row {
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+    }
+  }
+
+  .spec dt {
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--nose);
+    padding-top: 0.15rem;
+  }
+
+  .spec dd {
+    margin: 0;
+    display: grid;
+    gap: 0.3rem;
+  }
+
+  .spec dd > span {
+    font-size: var(--step-1);
+    line-height: 1.4;
+  }
+
+  /* ---- why ---- */
+  .why__grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 3vw, 3rem) clamp(2rem, 1rem + 4vw, 4.5rem);
+  }
+
+  @media (min-width: 66rem) {
+    .why__grid {
+      grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+      grid-template-areas:
+        'head head'
+        'shot list';
+      align-items: start;
+    }
+
+    .why__head {
+      grid-area: head;
+    }
+
+    .why__shot {
+      grid-area: shot;
+      position: sticky;
+      top: calc(var(--header-h) + 2rem);
+    }
+
+    .why__list {
+      grid-area: list;
+    }
+  }
+
+  .why__head {
+    margin-bottom: 0;
+  }
+
+  .why__shot {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .why__shot :global(img) {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-m);
+    border: 1px solid var(--line);
+    background: var(--well);
+  }
+
+  .why__shot figcaption {
+    display: grid;
+    gap: 0.25rem;
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .why__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+  }
+
+  .why__list li {
+    display: grid;
+    gap: 0.4rem;
+    padding-block: 1.4rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .why__list li:first-child {
+    border-top: 2px solid var(--ink);
+  }
+
+  .why__list p {
+    color: var(--ink-2);
+  }
+
+  /* ---- devlog teaser ---- */
+  .news__head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: end;
+    gap: 1rem;
+    margin-bottom: clamp(2rem, 1.5rem + 2vw, 3rem);
+  }
+
+  .news__head .section-head {
+    margin-bottom: 0;
+  }
+
+  .news__list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 1.5rem;
+  }
+
+  @media (min-width: 52rem) {
+    .news__list {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0;
+    }
+
+    .news__list > li + li .news__item {
+      border-left: 1px solid var(--line);
+    }
+
+    .news__item {
+      padding-inline: 1.5rem;
+    }
+
+    .news__list > li:first-child .news__item {
+      padding-left: 0;
+    }
+  }
+
+  .news__item {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+    height: 100%;
+    padding-top: 1rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  @media (min-width: 52rem) {
+    .news__item {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .news__list {
+      border-top: 2px solid var(--ink);
+      padding-top: 1.25rem;
+    }
+  }
+
+  .news__date {
+    display: flex;
+    gap: 0.75rem;
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+  }
+
+  .news__date time {
+    color: var(--nose);
+    font-weight: 600;
+  }
+
+  .news__item h3 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .news__item h3 a:hover {
+    color: var(--nose);
+    text-decoration: underline;
+  }
+
+  .news__item p:last-child {
+    color: var(--ink-2);
+  }
+
+  /* ---- community band ---- */
+  .community {
+    background: var(--band);
+    color: var(--band-ink);
+    padding-block: clamp(3.5rem, 2rem + 5vw, 6rem);
+  }
+
+  .community + :global(.site-footer) {
+    border-top: 1px solid var(--band-line);
+  }
+
+  .community__inner {
+    display: grid;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  @media (min-width: 60rem) {
+    .community__inner {
+      grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+      gap: 4rem;
+    }
+  }
+
+  .community__copy {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .community h2 {
+    font-size: var(--step-4);
+    font-stretch: 120%;
+  }
+
+  .community .eyebrow {
+    color: var(--band-accent);
+  }
+
+  .community__copy p:last-child {
+    font-size: var(--step-1);
+    color: var(--band-ink-2);
+    max-width: 52ch;
+  }
+
+  .community__copy strong {
+    color: var(--band-ink);
+  }
+
+  .community__actions {
+    display: grid;
+    gap: 0.9rem;
+    justify-items: stretch;
+  }
+
+  .community .btn-primary {
+    --btn-bg: var(--band-accent);
+    --btn-ink: #16151b;
+    --btn-edge: #000;
+    border-color: var(--band-accent);
+  }
+
+  .community .btn-primary:hover {
+    --btn-bg: #ffa3c2;
+  }
+
+  .btn-onband {
+    --btn-bg: transparent;
+    --btn-ink: var(--band-ink);
+    --btn-edge: var(--band-line);
+    border-color: var(--band-ink-2);
+  }
+
+  .community :focus-visible {
+    outline-color: var(--band-accent);
+  }
+
+  .community__small {
+    color: var(--band-ink-2);
+    justify-self: start;
+    font-size: var(--step--1);
+  }
+
+  .community__small:hover {
+    color: var(--band-accent);
+  }
+</style>

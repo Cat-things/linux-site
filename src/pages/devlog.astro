@@ -1,0 +1,289 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Icon from '../components/Icon.astro';
+import { devlog, commitTotal, formatDate } from '../data/devlog';
+import { links, repoFile, commitUrl } from '../data/site';
+
+const first = devlog[devlog.length - 1].commits.at(-1)!.date;
+const last = devlog[0].date;
+---
+
+<Base
+  title="Devlog"
+  description="What has changed in Kat Linux, written up from the distro repository's git history, newest first."
+>
+  <PageHead eyebrow="Devlog" title="What changed, and when">
+    Written up from the <a href={`${links.repo}/commits/main`}>git history</a> of the distro repository, newest first.
+    Commit messages are quoted as they were written.
+    <dl class="stats" slot="after">
+      <div><dt>Entries</dt><dd>{devlog.length}</dd></div>
+      <div><dt>Commits</dt><dd>{commitTotal}</dd></div>
+      <div>
+        <dt>Span</dt><dd>{formatDate(first, 'short')} – {formatDate(last, 'short')}</dd>
+      </div>
+    </dl>
+  </PageHead>
+
+  <div class="section">
+    <div class="wrap">
+      <ol class="log">
+        {
+          devlog.map((entry) => (
+            <li class="log__item">
+              <article id={entry.slug} aria-labelledby={`${entry.slug}-title`} class="entry">
+                <p class="entry__date">
+                  <time datetime={entry.date}>{formatDate(entry.date)}</time>
+                </p>
+                <div class="entry__body">
+                  <h2 id={`${entry.slug}-title`}>
+                    <a href={`#${entry.slug}`}>{entry.title}</a>
+                  </h2>
+                  <p class="entry__summary">{entry.summary}</p>
+                  <div class="entry__text">
+                    {entry.body.map((para) => (
+                      <p>{para}</p>
+                    ))}
+                  </div>
+                  <div class="entry__meta">
+                    <div>
+                      <h3>Files</h3>
+                      <ul class="files">
+                        {entry.files.map((f) => (
+                          <li>
+                            <a href={repoFile(f)}>{f}</a>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    <div>
+                      <h3>
+                        {entry.commits.length} commit{entry.commits.length === 1 ? '' : 's'}
+                      </h3>
+                      <ul class="commits">
+                        {entry.commits.map((c) => (
+                          <li>
+                            <a class="hash" href={commitUrl(c.hash)}>
+                              {c.hash}
+                            </a>
+                            <span class="msg">{c.message}</span>
+                            <span class="who">{c.author}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </article>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="log__end">
+        <a class="more" href={`${links.repo}/commits/main`}>Browse every commit on GitHub <Icon name="external" size={16} /></a>
+      </p>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 2.5rem;
+    margin-top: 0.5rem;
+  }
+
+  .stats div {
+    display: grid;
+    gap: 0.1rem;
+  }
+
+  .stats dt {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .stats dd {
+    margin: 0;
+    font-family: var(--type-display);
+    font-weight: 800;
+    font-stretch: 115%;
+    font-size: var(--step-2);
+    font-variant-numeric: tabular-nums;
+    color: var(--ink);
+  }
+
+  .log {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+  }
+
+  .log__item + .log__item {
+    border-top: 1px solid var(--line);
+  }
+
+  .entry {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.75rem 3rem;
+    padding-block: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  }
+
+  @media (min-width: 56rem) {
+    .entry {
+      grid-template-columns: 11rem minmax(0, 1fr);
+    }
+
+    .entry__date {
+      position: sticky;
+      top: calc(var(--header-h) + 1.5rem);
+      align-self: start;
+    }
+  }
+
+  .entry__date {
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    font-weight: 600;
+    color: var(--nose);
+    padding-top: 0.35rem;
+  }
+
+  .entry__date time::before {
+    content: '';
+    display: inline-block;
+    width: 0.6rem;
+    height: 0.6rem;
+    margin-right: 0.55rem;
+    border-radius: 50%;
+    background: var(--nose);
+    vertical-align: 0.05em;
+  }
+
+  .entry__body {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+    min-width: 0;
+    max-width: 48rem;
+  }
+
+  .entry h2 {
+    font-size: var(--step-3);
+  }
+
+  .entry h2 a {
+    color: var(--ink);
+    text-decoration: none;
+  }
+
+  .entry h2 a:hover {
+    color: var(--nose);
+  }
+
+  .entry__summary {
+    font-size: var(--step-1);
+    color: var(--ink-2);
+    line-height: 1.5;
+  }
+
+  .entry__text {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.85rem;
+    max-width: var(--measure);
+  }
+
+  .entry__meta {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1.25rem 2rem;
+    margin-top: 0.75rem;
+    padding: 1.1rem 1.25rem;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-m);
+    background: var(--card);
+  }
+
+  @media (min-width: 48rem) {
+    .entry__meta {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    }
+  }
+
+  .entry__meta > div {
+    min-width: 0;
+  }
+
+  .entry__meta h3 {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+    margin-bottom: 0.5rem;
+  }
+
+  .files,
+  .commits {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.35rem;
+    font-size: var(--step--1);
+  }
+
+  .files a {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+  }
+
+  .files a:hover {
+    color: var(--nose);
+  }
+
+  .commits li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0 0.75rem;
+    align-items: baseline;
+  }
+
+  .hash {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    font-weight: 600;
+  }
+
+  .msg {
+    overflow-wrap: anywhere;
+  }
+
+  .who {
+    grid-column: 2;
+    font-size: var(--step--2);
+    color: var(--ink-3);
+  }
+
+  .log__end {
+    padding-top: 1.5rem;
+    border-top: 2px solid var(--ink);
+  }
+
+  .more {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-weight: 700;
+  }
+</style>

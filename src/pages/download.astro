@@ -1,0 +1,673 @@
+---
+import Base from '../layouts/Base.astro';
+import PageHead from '../components/PageHead.astro';
+import Callout from '../components/Callout.astro';
+import CodeBlock from '../components/CodeBlock.astro';
+import Icon from '../components/Icon.astro';
+import Source from '../components/Source.astro';
+import { href } from '../lib/url';
+import { links, iso, biosMenu, uefiMenu } from '../data/site';
+
+const isoFile = 'katlinux-YYYY.MM.DD-x86_64.iso';
+---
+
+<Base
+  title="Download"
+  description="Download the Kat Linux live ISO, learn how the file is named, and write it to a USB stick with Ventoy, balenaEtcher or dd."
+>
+  <PageHead eyebrow="Download" title="Get the live ISO">
+    One ISO for BIOS and UEFI PCs. It boots into a live Xfce desktop with archinstall ready when you are.
+  </PageHead>
+
+  <section class="section dl">
+    <div class="wrap dl__grid">
+      <div class="dl__main">
+        <Callout tone="warning" title="Kat Linux is in early development">
+          <p>
+            Only the base ISO is ticked off in the project's to-do list, and every push to the repository produces a
+            new build. Try it in a virtual machine or on a spare computer first, and don't trust it with anything
+            important yet.
+          </p>
+        </Callout>
+
+        <div class="panel eared">
+          <div class="panel__head">
+            <p class="eyebrow">Latest build</p>
+            <h2>Kat Linux live ISO</h2>
+            <p class="panel__file mono">{isoFile}</p>
+          </div>
+          <a class="btn btn-primary btn-big panel__btn" href={links.release}>
+            <Icon name="download" />
+            Download from GitHub
+          </a>
+          <p class="panel__note">
+            The ISO is attached to the <a href={links.release}>“latest” release</a> on GitHub. If you see more than
+            one ISO there, take the one with the newest date in its name.
+          </p>
+          <dl class="facts">
+            <div><dt>Architecture</dt><dd>{iso.arch} (64-bit PCs)</dd></div>
+            <div><dt>Firmware</dt><dd>BIOS and UEFI</dd></div>
+            <div><dt>Live user</dt><dd><code>archie</code>, logged in automatically</dd></div>
+            <div><dt>Built by</dt><dd>GitHub Actions, on every push to <code>main</code></dd></div>
+          </dl>
+        </div>
+      </div>
+
+      <aside class="dl__aside">
+        <h2 class="aside-title">Before you flash</h2>
+        <ul class="checklist">
+          <li>A USB stick you can erase. Its contents will be lost.</li>
+          <li>A 64-bit (x86_64) PC, or a virtual machine.</li>
+          <li>A wired connection is easiest. Wi-Fi works from the terminal with <code>iwctl</code>.</li>
+          <li>
+            Secure Boot turned off. The profile doesn't set up Secure Boot signing, so firmware that enforces it may
+            refuse to start the stick.
+          </li>
+        </ul>
+        <p class="aside-more">
+          Next: <a href={href('/install/')}>the install guide <Icon name="arrow" size={16} /></a>
+        </p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="naming-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">File name</p>
+        <h2 id="naming-title">How the ISO is named</h2>
+        <p class="muted">
+          The name is put together by <code>mkarchiso</code> from the values in <code>profiledef.sh</code>, so you can
+          tell from the file name alone which build you have.
+        </p>
+      </div>
+
+      <figure class="anatomy" aria-label="Anatomy of the ISO file name">
+        <p class="anatomy__name mono" aria-hidden="true">
+          <span class="seg seg--a">katlinux</span><span class="sep">-</span><span class="seg seg--b">2026.11.07</span><span class="sep">-</span><span class="seg seg--c">x86_64</span><span class="sep">.iso</span>
+        </p>
+        <dl class="anatomy__parts">
+          <div class="part part--a">
+            <dt><code>katlinux</code></dt>
+            <dd>The <code>iso_name</code>. Every Kat Linux ISO starts with it.</dd>
+          </div>
+          <div class="part part--b">
+            <dt><code>YYYY.MM.DD</code></dt>
+            <dd>
+              The <code>iso_version</code>: the date the ISO was built. The example shows what a build from 7 November
+              2026 would be called.
+            </dd>
+          </div>
+          <div class="part part--c">
+            <dt><code>x86_64</code></dt>
+            <dd>The CPU architecture. It is the only one Kat Linux builds for.</dd>
+          </div>
+        </dl>
+        <figcaption>
+          <span>
+            When written to a USB stick, the volume label is <code>{iso.label}</code>, for example
+            <code>KAT_202611</code>.
+          </span>
+          <Source path="profiledef.sh" />
+        </figcaption>
+      </figure>
+
+      <Callout title="No checksums yet" class="naming-note">
+        <p>
+          The build workflow uploads only the ISO, with no checksum or signature files next to it. Verifying downloads
+          is a good first contribution if you want one.
+        </p>
+        <p><Source path=".github/workflows/buildiso.yml" /></p>
+      </Callout>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="flash-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Write it to USB</p>
+        <h2 id="flash-title">Flash the ISO</h2>
+        <p class="muted">Pick one of the three tools below. They all give you a bootable stick.</p>
+      </div>
+
+      <Callout tone="danger" title="This wipes the drive">
+        <p>
+          balenaEtcher and <code>dd</code> overwrite the whole USB stick. Installing Ventoy also erases the stick, the
+          first time only. Copy anything you want to keep off it first, and double-check you picked the right drive:
+          <code>dd</code> will happily overwrite your system disk if you tell it to.
+        </p>
+      </Callout>
+
+      <nav class="tool-nav" aria-label="Flashing tools">
+        <a href="#ventoy"><strong>Ventoy</strong><span>Keep several ISOs on one stick</span></a>
+        <a href="#etcher"><strong>balenaEtcher</strong><span>Point and click, on Windows, macOS and Linux</span></a>
+        <a href="#dd"><strong>dd</strong><span>One command, on any Linux system</span></a>
+      </nav>
+
+      <div class="tools">
+        <article class="tool" id="ventoy" aria-labelledby="ventoy-title">
+          <header>
+            <h3 id="ventoy-title">Ventoy</h3>
+            <a class="ext" href={links.ventoy}>ventoy.net <Icon name="external" size={14} /></a>
+          </header>
+          <ol class="mini-steps">
+            <li>Install Ventoy onto the USB stick with Ventoy2Disk. This erases the stick once.</li>
+            <li>Copy the <code>katlinux-…-x86_64.iso</code> file onto the stick like any other file.</li>
+            <li>Boot from the stick and choose the Kat Linux ISO from Ventoy's list.</li>
+          </ol>
+          <p class="tool__note">Later builds can sit next to the old one. Just copy the new file over.</p>
+        </article>
+
+        <article class="tool" id="etcher" aria-labelledby="etcher-title">
+          <header>
+            <h3 id="etcher-title">balenaEtcher</h3>
+            <a class="ext" href={links.etcher}>etcher.balena.io <Icon name="external" size={14} /></a>
+          </header>
+          <ol class="mini-steps">
+            <li>Open balenaEtcher and choose <strong>Flash from file</strong>, then pick the ISO.</li>
+            <li>Choose <strong>Select target</strong> and pick your USB stick.</li>
+            <li>Press <strong>Flash!</strong> and wait for it to finish validating.</li>
+          </ol>
+          <p class="tool__note">Etcher checks the written data afterwards, which catches bad sticks.</p>
+        </article>
+
+        <article class="tool tool--wide" id="dd" aria-labelledby="dd-title">
+          <header>
+            <h3 id="dd-title"><code>dd</code> on Linux</h3>
+          </header>
+          <ol class="mini-steps">
+            <li>
+              <p>Plug in the stick and find its device name. Go by the size and model, not the order.</p>
+              <CodeBlock label="Find the USB stick" code="lsblk -o NAME,SIZE,MODEL,TRAN" />
+            </li>
+            <li>
+              <p>If your desktop mounted it, unmount its partitions.</p>
+              <CodeBlock label="Unmount" code="sudo umount /dev/sdX?*" />
+            </li>
+            <li>
+              <p>
+                Write the ISO. Replace <code>/dev/sdX</code> with the whole device (like <code>/dev/sdb</code>), not
+                a partition (like <code>/dev/sdb1</code>), and use your real file name.
+              </p>
+              <CodeBlock
+                label="Write the ISO (erases the stick)"
+                code="sudo dd if=katlinux-YYYY.MM.DD-x86_64.iso of=/dev/sdX bs=4M status=progress oflag=sync"
+              />
+            </li>
+          </ol>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" aria-labelledby="firmware-title">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="eyebrow">Booting</p>
+        <h2 id="firmware-title">UEFI and BIOS</h2>
+        <p class="muted">
+          The ISO carries a boot menu for each firmware type. Start the PC with the stick plugged in and open its
+          one-time boot menu (often <kbd>F12</kbd>, <kbd>F11</kbd>, <kbd>F8</kbd> or <kbd>Esc</kbd>, depending on
+          the maker).
+        </p>
+      </div>
+
+      <div class="table-scroll" tabindex="0" role="region" aria-label="Boot menus on the Kat Linux ISO">
+        <table>
+          <caption class="visually-hidden">Boot menus on the Kat Linux ISO</caption>
+          <thead>
+            <tr>
+              <th scope="col">Firmware</th>
+              <th scope="col">Boot menu</th>
+              <th scope="col">Entries</th>
+              <th scope="col">Auto-boot</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <th scope="row">BIOS / legacy</th>
+              <td>syslinux, titled “Kat Linux”, over the boot splash</td>
+              <td>
+                <ul class="cell-list">
+                  {biosMenu.entries.map((e) => <li>{e.label}</li>)}
+                </ul>
+              </td>
+              <td class="mono">{biosMenu.timeoutSeconds} s</td>
+            </tr>
+            <tr>
+              <th scope="row">UEFI</th>
+              <td>systemd-boot</td>
+              <td>
+                <ul class="cell-list">
+                  {uefiMenu.entries.map((e) => <li>{e}</li>)}
+                </ul>
+              </td>
+              <td class="mono">{uefiMenu.timeoutSeconds} s</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <p class="table-source">
+        <Source path={['profiledef.sh', 'syslinux/', 'efiboot/loader/']} />
+      </p>
+
+      <div class="notes">
+        <div>
+          <h3>The UEFI menu still says “Arch Linux”</h3>
+          <p>
+            The systemd-boot entries haven't been renamed yet. It is the same Kat Linux ISO either way; pick the first
+            entry.
+          </p>
+        </div>
+        <div>
+          <h3>Screen reader</h3>
+          <p>
+            Both menus have an entry with speech, which starts the speakup screen reader. On the BIOS menu, press
+            <kbd>S</kbd> to jump to it.
+          </p>
+        </div>
+        <div>
+          <h3>Virtual machines</h3>
+          <p>
+            Guest tools for QEMU, VirtualBox, VMware and Hyper-V are on the ISO, so it is comfortable to test in a VM
+            before touching real hardware.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .dl__grid {
+    display: grid;
+    gap: clamp(2rem, 1rem + 3vw, 3.5rem);
+  }
+
+  @media (min-width: 62rem) {
+    .dl__grid {
+      grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr);
+      align-items: start;
+    }
+  }
+
+  .dl__main {
+    display: grid;
+    gap: 1rem;
+    min-width: 0;
+  }
+
+  /* ---- the eared download panel ---- */
+  .panel {
+    --ear-color: var(--ink);
+    --ear-inset: 10%;
+    display: grid;
+    gap: 1.25rem;
+    padding: clamp(1.25rem, 1rem + 2vw, 2.25rem);
+    border: 2px solid var(--ink);
+    border-radius: var(--radius-l);
+    background: var(--card);
+    margin-top: 2.75rem;
+  }
+
+  .panel__head {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  .panel h2 {
+    font-size: var(--step-3);
+  }
+
+  .panel__file {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    overflow-wrap: anywhere;
+  }
+
+  .panel__btn {
+    justify-self: start;
+  }
+
+  @media (max-width: 30rem) {
+    .panel__btn {
+      justify-self: stretch;
+    }
+  }
+
+  .panel__note {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+    max-width: 56ch;
+  }
+
+  .facts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+    gap: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .facts div {
+    padding: 0.8rem 0;
+    border-bottom: 1px solid var(--line);
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .facts dt {
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-3);
+  }
+
+  .facts dd {
+    margin: 0;
+    font-weight: 600;
+  }
+
+  /* ---- aside ---- */
+  .dl__aside {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    padding-top: 0.25rem;
+  }
+
+  .aside-title {
+    font-size: var(--step-2);
+  }
+
+  .checklist {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0;
+    border-top: 2px solid var(--ink);
+  }
+
+  .checklist li {
+    position: relative;
+    padding: 0.85rem 0 0.85rem 1.9rem;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .checklist li::before {
+    content: '';
+    position: absolute;
+    left: 0.15rem;
+    top: 1.15rem;
+    width: 0.95rem;
+    height: 0.95rem;
+    border: 2px solid var(--nose);
+    border-radius: 3px;
+  }
+
+  .aside-more a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-weight: 700;
+  }
+
+  /* ---- anatomy of the file name ---- */
+  .anatomy {
+    display: grid;
+    gap: 1.5rem;
+    padding: clamp(1.25rem, 1rem + 2vw, 2.5rem);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-l);
+    background: var(--card);
+    margin-bottom: 1.5rem;
+  }
+
+  .anatomy__name {
+    font-size: clamp(1.05rem, 0.5rem + 3.2vw, 2.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
+  }
+
+  .seg {
+    border-bottom: 4px solid currentColor;
+    padding-bottom: 0.05em;
+  }
+
+  .seg--a,
+  .part--a dt code {
+    color: var(--nose);
+  }
+
+  .seg--b,
+  .part--b dt code {
+    color: var(--iris);
+  }
+
+  .seg--c,
+  .part--c dt code {
+    color: var(--ink);
+  }
+
+  .sep {
+    color: var(--ink-3);
+  }
+
+  .anatomy__parts {
+    display: grid;
+    gap: 1rem 2rem;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+  }
+
+  .part {
+    display: grid;
+    gap: 0.35rem;
+    align-content: start;
+    padding-top: 0.75rem;
+    border-top: 3px solid currentColor;
+  }
+
+  .part--a {
+    color: var(--nose);
+  }
+
+  .part--b {
+    color: var(--iris);
+  }
+
+  .part--c {
+    color: var(--ink);
+  }
+
+  .part dt code {
+    background: none;
+    border: 0;
+    padding: 0;
+    font-weight: 700;
+    font-size: var(--step-0);
+  }
+
+  .part dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+
+  .anatomy figcaption {
+    display: grid;
+    gap: 0.35rem;
+    color: var(--ink-2);
+    font-size: var(--step--1);
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  :global(.naming-note) {
+    max-width: 48rem;
+  }
+
+  /* ---- flashing tools ---- */
+  .tool-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+    gap: 0.75rem;
+    margin-block: 1.5rem 2rem;
+  }
+
+  .tool-nav a {
+    display: grid;
+    gap: 0.15rem;
+    padding: 0.9rem 1rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    color: var(--ink);
+    text-decoration: none;
+    background: var(--card);
+  }
+
+  .tool-nav a:hover {
+    border-color: var(--nose);
+    color: var(--ink);
+  }
+
+  .tool-nav strong {
+    font-family: var(--type-display);
+    font-stretch: 110%;
+    font-size: var(--step-1);
+  }
+
+  .tool-nav span {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  .tools {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  @media (min-width: 52rem) {
+    .tools {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .tool--wide {
+      grid-column: 1 / -1;
+    }
+  }
+
+  .tool {
+    display: grid;
+    gap: 1rem;
+    align-content: start;
+    padding: clamp(1.1rem, 1rem + 1vw, 1.75rem);
+    border-top: 2px solid var(--ink);
+    background: var(--card);
+    border-radius: 0 0 var(--radius-m) var(--radius-m);
+    min-width: 0;
+  }
+
+  .tool header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem 1rem;
+  }
+
+  .tool h3 {
+    font-size: var(--step-2);
+  }
+
+  .tool h3 code {
+    font-size: 0.95em;
+    background: none;
+    border: 0;
+    padding: 0;
+  }
+
+  .ext {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    font-size: var(--step--1);
+  }
+
+  .mini-steps {
+    margin: 0;
+    padding-left: 1.4rem;
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .mini-steps li {
+    padding-left: 0.25rem;
+    min-width: 0;
+  }
+
+  .mini-steps li > * + * {
+    margin-top: 0.6rem;
+  }
+
+  .mini-steps li::marker {
+    font-family: var(--type-mono);
+    font-weight: 700;
+    color: var(--nose);
+  }
+
+  .tool__note {
+    font-size: var(--step--1);
+    color: var(--ink-2);
+  }
+
+  /* ---- firmware table ---- */
+  .cell-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.2rem;
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+  }
+
+  td.mono {
+    white-space: nowrap;
+  }
+
+  tbody th {
+    font-family: var(--type-body);
+    font-size: var(--step--1);
+    text-transform: none;
+    letter-spacing: 0;
+    color: var(--ink);
+    font-weight: 700;
+    background: none;
+    white-space: nowrap;
+  }
+
+  .table-source {
+    margin-top: 0.6rem;
+  }
+
+  .notes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+    gap: 1.5rem 2rem;
+    margin-top: 2.5rem;
+  }
+
+  .notes > div {
+    display: grid;
+    gap: 0.4rem;
+    align-content: start;
+    padding-top: 1rem;
+    border-top: 1px solid var(--line);
+  }
+
+  .notes p {
+    color: var(--ink-2);
+  }
+</style>

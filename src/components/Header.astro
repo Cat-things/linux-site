@@ -1,0 +1,255 @@
+---
+import Logo from './Logo.astro';
+import { href, isCurrent } from '../lib/url';
+
+const nav = [
+  { path: '/download/', label: 'Download' },
+  { path: '/install/', label: 'Install' },
+  { path: '/features/', label: "What's inside" },
+  { path: '/devlog/', label: 'Devlog' },
+  { path: '/roadmap/', label: 'Roadmap' },
+  { path: '/community/', label: 'Community' },
+  { path: '/faq/', label: 'FAQ' },
+];
+const current = Astro.url.pathname;
+---
+
+<header class="site-header">
+  <div class="wrap site-header__inner">
+    <a class="brand" href={href('/')}>
+      <Logo size={34} />
+      <span class="brand__word"><b>kat</b> linux</span><span class="visually-hidden">, home</span>
+    </a>
+
+    <button class="menu-btn" type="button" popovertarget="site-menu" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false">
+        <path d="M4 7h16M4 12h16M4 17h10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"
+        ></path>
+      </svg>
+      <span>Menu</span>
+    </button>
+
+    <nav id="site-menu" class="site-nav" aria-label="Main" popover>
+      <ul>
+        {
+          nav.map((item) => (
+            <li>
+              <a
+                href={href(item.path)}
+                aria-current={isCurrent(current, item.path) ? 'page' : undefined}
+                class:list={[{ 'is-cta': item.path === '/download/' }]}
+              >
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .site-header__inner {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    min-height: var(--header-h);
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--ink);
+    text-decoration: none;
+    margin-right: auto;
+    padding-block: 0.4rem;
+  }
+
+  .brand:hover {
+    color: var(--ink);
+  }
+
+  .brand__word {
+    font-family: var(--type-display);
+    font-size: 1.3rem;
+    font-weight: 500;
+    font-stretch: 122%;
+    letter-spacing: -0.02em;
+    word-spacing: -0.24em;
+    line-height: 1;
+  }
+
+  .brand__word b {
+    font-weight: 850;
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .brand:hover :global(.kat-mark__cursor) {
+      animation: blink 1s steps(1) infinite;
+    }
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .menu-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    min-height: 2.75rem;
+    padding: 0.4rem 0.85rem;
+    border: 1.5px solid var(--line-strong);
+    border-radius: var(--radius-m);
+    background: var(--card);
+    color: var(--ink);
+    font: 700 var(--step--1) / 1 var(--type-body);
+    cursor: pointer;
+  }
+
+  /* ---- mobile: popover sheet ---- */
+  .site-nav {
+    position: fixed;
+    inset: var(--header-h) 0 auto 0;
+    width: auto;
+    height: auto;
+    max-height: calc(100dvh - var(--header-h));
+    margin: 0;
+    padding: 0.75rem var(--gutter-r) 1.5rem var(--gutter);
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper);
+    color: var(--ink);
+    overflow: auto;
+    box-shadow: 0 24px 40px -24px rgb(0 0 0 / 0.35);
+  }
+
+  .site-nav::backdrop {
+    background: rgb(0 0 0 / 0.25);
+  }
+
+  .site-nav ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+  }
+
+  .site-nav a {
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    padding: 0.4rem 0.25rem;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    text-decoration: none;
+    font-family: var(--type-display);
+    font-weight: 700;
+    font-stretch: 112%;
+    font-size: var(--step-1);
+  }
+
+  .site-nav a[aria-current='page'] {
+    color: var(--nose);
+  }
+
+  .site-nav a[aria-current='page']::after {
+    content: '';
+    width: 0.5rem;
+    height: 0.5rem;
+    margin-left: 0.6rem;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  @supports not selector(:popover-open) {
+    .site-nav {
+      position: static;
+      display: block;
+      box-shadow: none;
+    }
+    .menu-btn {
+      display: none;
+    }
+    .site-header__inner {
+      flex-wrap: wrap;
+    }
+  }
+
+  /* ---- desktop: inline nav ---- */
+  @media (min-width: 66rem) {
+    .menu-btn {
+      display: none;
+    }
+
+    .site-nav,
+    .site-nav:not(:popover-open) {
+      display: block;
+      position: static;
+      inset: auto;
+      max-height: none;
+      padding: 0;
+      border: 0;
+      background: none;
+      box-shadow: none;
+      overflow: visible;
+    }
+
+    .site-nav ul {
+      display: flex;
+      align-items: center;
+      gap: 0.15rem;
+    }
+
+    .site-nav a {
+      min-height: 2.5rem;
+      padding: 0.35rem 0.7rem;
+      border: 0;
+      border-radius: var(--radius-m);
+      font-family: var(--type-body);
+      font-weight: 600;
+      font-stretch: normal;
+      font-size: var(--step--1);
+      color: var(--ink-2);
+    }
+
+    .site-nav a:hover {
+      color: var(--ink);
+      background: var(--well);
+    }
+
+    .site-nav a[aria-current='page'] {
+      color: var(--ink);
+      background: var(--well);
+    }
+
+    .site-nav a[aria-current='page']::after {
+      display: none;
+    }
+
+    .site-nav a.is-cta {
+      margin-left: 0.5rem;
+      padding-inline: 1rem;
+      background: var(--nose);
+      color: var(--on-nose);
+      box-shadow: 0 2px 0 var(--shadow-key);
+    }
+
+    .site-nav a.is-cta:hover {
+      background: var(--nose-hover);
+      color: var(--on-nose);
+    }
+  }
+</style>

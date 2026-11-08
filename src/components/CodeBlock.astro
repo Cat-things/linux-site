@@ -1,0 +1,185 @@
+---
+// A shell snippet with a copy button. Lines starting with "#" render as comments.
+// `prompt` shows a "$" (or "#" for root) in front of each command; it is never copied.
+import Icon from './Icon.astro';
+
+interface Props {
+  code: string;
+  label?: string;
+  prompt?: '$' | '#' | false;
+  class?: string;
+}
+
+const { code, label = 'Terminal', prompt = '$', class: className } = Astro.props;
+const raw = code.replace(/^\n+|\s+$/g, '');
+const lines = raw.split('\n').map((text, i, all) => {
+  const isComment = /^\s*#/.test(text);
+  const continues = i > 0 && /\\\s*$/.test(all[i - 1]);
+  return { text, isComment, showPrompt: Boolean(prompt) && !isComment && !continues && text.trim() !== '' };
+});
+---
+
+<figure class:list={['code', className]}>
+  <figcaption class="code__bar">
+    <span class="code__label"><Icon name="terminal" size={16} />{label}</span>
+    <button class="code__copy" type="button" data-copy={raw} aria-label={`Copy: ${label}`}>
+      <Icon name="copy" size={16} class="code__icon-copy" />
+      <Icon name="check" size={16} class="code__icon-done" />
+      <span class="code__copy-text">Copy</span>
+    </button>
+  </figcaption>
+  <pre tabindex="0"><code>{lines.map((l) => (
+    <span class:list={['line', { 'is-comment': l.isComment }]} data-prompt={l.showPrompt ? prompt : undefined}>{l.text}{'\n'}</span>
+  ))}</code></pre>
+</figure>
+
+<script>
+  function announce(message: string) {
+    const region = document.getElementById('announcer');
+    if (!region) return;
+    region.textContent = '';
+    window.setTimeout(() => (region.textContent = message), 50);
+  }
+
+  function selectCode(button: HTMLElement) {
+    const code = button.closest('.code')?.querySelector('code');
+    if (!code) return;
+    const range = document.createRange();
+    range.selectNodeContents(code);
+    const selection = window.getSelection();
+    selection?.removeAllRanges();
+    selection?.addRange(range);
+  }
+
+  document.addEventListener('click', async (event) => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest<HTMLButtonElement>('button[data-copy]');
+    if (!button) return;
+    const text = button.dataset.copy ?? '';
+    const label = button.querySelector('.code__copy-text');
+    try {
+      await navigator.clipboard.writeText(text);
+      button.dataset.state = 'copied';
+      if (label) label.textContent = 'Copied';
+      announce('Copied to clipboard');
+    } catch {
+      selectCode(button);
+      button.dataset.state = 'manual';
+      if (label) label.textContent = 'Press Ctrl+C';
+      announce('Copy failed. The text is selected, press Control C to copy it.');
+    }
+    window.clearTimeout(Number(button.dataset.timer));
+    button.dataset.timer = String(
+      window.setTimeout(() => {
+        delete button.dataset.state;
+        if (label) label.textContent = 'Copy';
+      }, 2200),
+    );
+  });
+</script>
+
+<style>
+  .code {
+    border-radius: var(--radius-m);
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border: 1px solid var(--code-bg);
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .code__bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.35rem 0.4rem 0.35rem 0.9rem;
+    border-bottom: 1px solid rgb(255 255 255 / 0.1);
+    font-family: var(--type-mono);
+    font-size: var(--step--2);
+    color: var(--code-dim);
+  }
+
+  .code__label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .code__copy {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 2.25rem;
+    min-width: 2.75rem;
+    padding: 0.3rem 0.7rem;
+    border: 1px solid rgb(255 255 255 / 0.22);
+    border-radius: var(--radius-s);
+    background: transparent;
+    color: var(--code-ink);
+    font: 600 var(--step--2) / 1 var(--type-mono);
+    cursor: pointer;
+  }
+
+  .code__copy:hover {
+    border-color: var(--code-accent);
+    color: var(--code-accent);
+  }
+
+  .code__copy:focus-visible {
+    outline-color: var(--code-accent);
+  }
+
+  .code__copy :global(.code__icon-done) {
+    display: none;
+  }
+
+  .code__copy[data-state='copied'] {
+    color: var(--code-accent);
+    border-color: var(--code-accent);
+  }
+
+  .code__copy[data-state='copied'] :global(.code__icon-done) {
+    display: block;
+  }
+
+  .code__copy[data-state='copied'] :global(.code__icon-copy) {
+    display: none;
+  }
+
+  pre {
+    margin: 0;
+    padding: 1rem 1.1rem 1.1rem;
+    overflow-x: auto;
+    font-family: var(--type-mono);
+    font-size: var(--step--1);
+    line-height: 1.7;
+    tab-size: 2;
+  }
+
+  pre:focus-visible {
+    outline: 2px solid var(--code-accent);
+    outline-offset: -2px;
+  }
+
+  code {
+    font-size: inherit;
+    font-family: inherit;
+  }
+
+  .line {
+    white-space: pre;
+  }
+
+  .line[data-prompt]::before {
+    content: attr(data-prompt) ' ';
+    color: var(--code-accent);
+    user-select: none;
+  }
+
+  .is-comment {
+    color: var(--code-dim);
+  }
+</style>
